@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тренажёр: Word Formation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: one narrow column; mode tabs on top, a single big working card below. */
+:root{
+  --bg:#FBF7F1; --surface:#FFFFFF; --fg:#22193A; --muted:#625A74; --line:#E7E0EC;
+  --pink:#E2457E; --pink-soft:#FCE6EE; --blue:#3A57E8; --blue-soft:#E6EBFD;
+  --sun:#F2C232; --sun-soft:#FDF3D2; --ok:#16936A; --ok-soft:#DDF4EB; --bad:#C8384A; --bad-soft:#FBE3E6;
+  --display:"Unbounded","Arial Black",Arial,sans-serif; --body:"Nunito","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:22px}
+h1,h2{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(26px,6vw,40px)}
+p{margin:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.top a{color:var(--muted);font-weight:700;text-decoration:none;font-size:15px}
+.top a:hover{color:var(--blue)}
+.lead{color:var(--muted)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button,.btn{font:inherit;font-weight:800;border-radius:999px;cursor:pointer;border:2px solid var(--line);background:var(--surface);color:var(--fg);padding:10px 18px}
+.tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.good{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.btn.again{background:var(--pink-soft);border-color:var(--pink);color:var(--pink)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:700;color:var(--muted);font-size:15px}
+select{font:inherit;font-weight:700;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--fg)}
+.progress{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.progress span{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .3s}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:28px 24px;display:flex;flex-direction:column;gap:18px;min-height:280px}
+.base{font-family:var(--display);font-weight:800;font-size:clamp(30px,8vw,48px);letter-spacing:.02em;color:var(--pink);word-break:break-word}
+.hint{color:var(--muted);font-size:15px}
+.list{display:flex;flex-direction:column;gap:8px}
+.list div{display:flex;flex-wrap:wrap;gap:4px 10px;padding:10px 14px;border-radius:14px;background:var(--blue-soft)}
+.list b{color:var(--blue);font-size:18px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.flip{align-self:flex-start}
+.q-ru{font-size:22px;font-weight:800}
+input[type=text]{font:inherit;font-size:22px;font-weight:700;padding:12px 16px;border-radius:16px;border:2px solid var(--line);background:var(--bg);color:var(--fg);width:100%}
+.fb{padding:12px 16px;border-radius:14px;font-weight:700}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.no{background:var(--bad-soft);color:var(--bad)}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:480px){.choices{grid-template-columns:1fr}}
+.choices button{font:inherit;font-weight:700;text-align:left;padding:14px 16px;border-radius:16px;border:2px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
+.choices button.correct{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.choices button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.done{text-align:center;align-items:center;justify-content:center}
+.big{font-family:var(--display);font-size:56px;font-weight:800;color:var(--blue)}
+footer{color:var(--muted);font-size:14px;text-align:center}
+@media (prefers-reduced-motion: reduce){.progress span{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="index.html">← На главную</a>
+    <span class="hint" id="knownTotal"></span>
+  </div>
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <h1>Word Formation: тренажёр</h1>
+    <p class="lead">Слова для заданий 29–34 ОГЭ. Карточки — чтобы выучить, тесты — чтобы проверить себя.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" id="tab-cards" aria-selected="true">Карточки</button>
+    <button type="button" role="tab" id="tab-type" aria-selected="false">Напиши слово</button>
+    <button type="button" role="tab" id="tab-choice" aria-selected="false">Выбери перевод</button>
+  </div>
+
+  <div class="bar">
+    <label for="range">Слова:</label>
+    <select id="range">
+      <option value="all">Все</option>
+      <option value="A-D">A – D</option>
+      <option value="E-H">E – H</option>
+      <option value="I-N">I – N</option>
+      <option value="O-R">O – R</option>
+      <option value="S-Z">S – Z</option>
+      <option value="new">Только невыученные</option>
+    </select>
+  </div>
+  <div class="progress" aria-hidden="true"><span id="prog" style="width:0%"></span></div>
+
+  <div class="card" id="stage" aria-live="polite"></div>
+
+  <footer>Прогресс сохраняется в этом браузере · English with Sis</footer>
+</div>
+
+<script>
+const RAW = `ACT|action=действие;active=активный;activity=занятие, деятельность;actor=актёр
+ADD|addition=добавление;additional=дополнительный
+ADMIRE|admiration=восхищение;admirer=поклонник
+ADVENTURE|adventurous=любящий приключения;adventurer=искатель приключений
+AGREE|agreement=согласие, соглашение;disagree=не соглашаться;agreeable=приятный, согласный
+AMAZE|amazing=удивительный;amazed=изумлённый;amazement=изумление
+APPEAR|appearance=внешность, появление;disappear=исчезать;disappearance=исчезновение
+ARGUE|argument=спор
+ART|artist=художник;artistic=художественный, артистичный
+ATTRACT|attraction=достопримечательность;attractive=привлекательный
+BEAUTY|beautiful=красивый;beautifully=красиво
+BELIEVE|belief=вера, убеждение;unbelievable=невероятный
+BORE|boring=скучный (о чём-то);bored=скучающий (о человеке);boredom=скука
+CARE|careful=осторожный;careless=небрежный, неосторожный;carefully=осторожно
+CELEBRATE|celebration=празднование
+CHILD|childhood=детство;childish=ребяческий
+CHOOSE|choice=выбор
+CLOUD|cloudy=облачный
+COLLECT|collection=коллекция;collector=коллекционер
+COLOUR|colourful=красочный
+COMFORT|comfortable=удобный;uncomfortable=неудобный;comfortably=удобно
+COMMUNICATE|communication=общение
+COMPETE|competition=соревнование, конкурс;competitor=участник соревнования;competitive=конкурентный
+CONFIDENT|confidence=уверенность;confidently=уверенно
+CREATE|creation=создание;creative=творческий;creator=создатель;creature=существо
+CULTURE|cultural=культурный
+DANGER|dangerous=опасный;endanger=подвергать опасности
+DAY|daily=ежедневный
+DECIDE|decision=решение
+DEEP|depth=глубина;deeply=глубоко
+DESCRIBE|description=описание
+DEVELOP|development=развитие;developing=развивающийся
+DIE|death=смерть;dead=мёртвый;deadly=смертельный
+DIFFERENT|difference=разница;differently=по-разному
+DIRECT|direction=направление;director=режиссёр, директор;directly=прямо
+DISAPPOINT|disappointed=разочарованный;disappointing=разочаровывающий;disappointment=разочарование
+DISCOVER|discovery=открытие;discoverer=первооткрыватель
+EDUCATE|education=образование;educational=образовательный
+EFFECT|effective=эффективный
+EMPLOY|employer=работодатель;employee=работник;employment=работа, занятость;unemployed=безработный
+ENERGY|energetic=энергичный
+ENJOY|enjoyable=приятный, доставляющий удовольствие;enjoyment=удовольствие
+ENTERTAIN|entertainment=развлечение;entertaining=занимательный
+ENVIRONMENT|environmental=экологический
+EQUIP|equipment=оборудование, снаряжение
+EXCITE|exciting=захватывающий;excited=взволнованный;excitement=волнение
+EXPECT|expectation=ожидание;unexpected=неожиданный
+EXPENSE|expensive=дорогой;inexpensive=недорогой
+EXPLAIN|explanation=объяснение
+FAME|famous=знаменитый
+FASHION|fashionable=модный
+FINAL|finally=наконец
+FORTUNATE|fortunately=к счастью;unfortunately=к сожалению
+FORGET|forgetful=забывчивый;unforgettable=незабываемый
+FREE|freedom=свобода;freely=свободно
+FRIEND|friendly=дружелюбный;unfriendly=недружелюбный;friendship=дружба
+GROW|growth=рост
+HAPPY|happiness=счастье;unhappy=несчастный;happily=счастливо
+HARM|harmful=вредный;harmless=безвредный
+HEALTH|healthy=здоровый;unhealthy=нездоровый, вредный для здоровья
+HELP|helpful=полезный, готовый помочь;helpless=беспомощный
+HIGH|height=высота, рост;highly=очень, высоко
+HISTORY|historical=исторический;historic=исторически важный;historian=историк
+HOME|homeless=бездомный
+HOPE|hopeful=полный надежд;hopeless=безнадёжный
+ILL|illness=болезнь
+IMAGINE|imagination=воображение;imaginative=с богатым воображением;imaginary=воображаемый
+IMPORTANT|importance=важность;unimportant=неважный
+IMPRESS|impression=впечатление;impressive=впечатляющий
+IMPROVE|improvement=улучшение
+INDEPENDENT|independence=независимость
+INFORM|information=информация;informative=информативный
+INTEREST|interesting=интересный;interested=заинтересованный
+INVENT|invention=изобретение;inventor=изобретатель
+INVITE|invitation=приглашение
+JOURNAL|journalist=журналист
+KIND|kindness=доброта;unkind=недобрый
+KNOW|knowledge=знания;known=известный;unknown=неизвестный
+LEAD|leader=лидер;leadership=руководство
+LEGAL|illegal=незаконный
+LIKE|dislike=не любить;likely=вероятный;unlikely=маловероятный
+LIVE|life=жизнь;alive=живой;lively=оживлённый
+LONG|length=длина
+LOSE|loss=потеря
+LOVE|lovely=милый, прекрасный
+LUCK|lucky=удачливый;unlucky=неудачливый;luckily=к счастью (повезло)
+MEMBER|membership=членство
+MONTH|monthly=ежемесячный
+MUSIC|musical=музыкальный;musician=музыкант
+MYSTERY|mysterious=таинственный
+NATION|national=национальный;international=международный;nationality=национальность
+NATURE|natural=естественный, природный;naturally=естественно, конечно
+NECESSARY|unnecessary=ненужный
+NERVE|nervous=нервный
+NOISE|noisy=шумный
+ORGANISE|organisation=организация;organiser=организатор
+OWN|owner=владелец
+PAIN|painful=болезненный
+PATIENT|patience=терпение;impatient=нетерпеливый
+PEACE|peaceful=мирный, спокойный
+PERFORM|performance=выступление;performer=исполнитель
+PERSON|personal=личный;personality=личность
+PLEASE|pleasure=удовольствие;pleasant=приятный;unpleasant=неприятный;pleased=довольный
+POLITE|impolite=невежливый;politely=вежливо
+POLLUTE|pollution=загрязнение
+POPULAR|popularity=популярность;unpopular=непопулярный
+POSSIBLE|possibility=возможность;impossible=невозможный;possibly=возможно
+POWER|powerful=мощный, сильный
+PREDICT|prediction=предсказание;predictable=предсказуемый;unpredictable=непредсказуемый
+PRIDE|proud=гордый
+PROFESSION|professional=профессиональный
+PROTECT|protection=защита;protective=защитный
+REAL|reality=реальность;really=действительно;realise=осознавать
+REGULAR|irregular=нерегулярный, неправильный;regularly=регулярно
+RELY|reliable=надёжный
+RESPONSIBLE|responsibility=ответственность;irresponsible=безответственный
+SCIENCE|scientist=учёный;scientific=научный
+SELF|selfish=эгоистичный
+SLEEP|sleepy=сонный
+SOLVE|solution=решение (задачи, проблемы)
+STRONG|strength=сила
+SUCCEED|success=успех;successful=успешный;unsuccessful=неуспешный;successfully=успешно
+SUDDEN|suddenly=внезапно
+SUN|sunny=солнечный
+SURPRISE|surprising=удивительный;surprised=удивлённый
+TALENT|talented=талантливый
+TASTE|tasty=вкусный
+TIDY|untidy=неопрятный
+TIRE|tired=уставший;tiring=утомительный
+TOUR|tourist=турист;tourism=туризм
+TRADITION|traditional=традиционный
+TRANSLATE|translation=перевод;translator=переводчик
+TRUE|truth=правда;truly=искренне, по-настоящему
+USE|useful=полезный;useless=бесполезный;user=пользователь
+USUAL|usually=обычно;unusual=необычный
+VALUE|valuable=ценный
+VISIT|visitor=посетитель
+WEEK|weekly=еженедельный
+WIDE|width=ширина;widely=широко
+WIN|winner=победитель
+WIND|windy=ветреный
+WONDER|wonderful=замечательный
+WRITE|writer=писатель`;
+
+const FAMILIES = RAW.trim().split('\n').map(line => {
+  const [base, rest] = line.split('|');
+  return { base, words: rest.split(';').map(p => { const [w, t] = p.split('='); return { w, t }; }) };
+});
+const ITEMS = FAMILIES.flatMap(f => f.words.map(x => ({ base: f.base, w: x.w, t: x.t })));
+document.getElementById('knownTotal').textContent = FAMILIES.length + ' семей · ' + ITEMS.length + ' слов';
+
+// storage (per-viewer, optional)
+const KEY = 'ews-words-known';
+function loadKnown(){ try { return new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch(e){ return new Set(); } }
+function saveKnown(){ try { localStorage.setItem(KEY, JSON.stringify([...known])); } catch(e){} }
+let known = loadKnown();
+
+const stage = document.getElementById('stage'), prog = document.getElementById('prog'), rangeSel = document.getElementById('range');
+let mode = 'cards';
+
+function inRange(base){
+  const r = rangeSel.value; if (r === 'all' || r === 'new') return true;
+  const [a, b] = r.split('-'); const c = base[0]; return c >= a && c <= b;
+}
+function pool(){
+  return FAMILIES.filter(f => inRange(f.base) && (rangeSel.value !== 'new' || !known.has(f.base)));
+}
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function el(tag, attrs, ...kids){ const e = document.createElement(tag); Object.assign(e, attrs || {}); kids.forEach(k => e.append(k)); return e; }
+function setProg(x){ prog.style.width = Math.round(x * 100) + '%'; }
+function updateKnownProg(){ const fs = FAMILIES.filter(f => inRange(f.base)); setProg(fs.length ? fs.filter(f => known.has(f.base)).length / fs.length : 0); }
+
+/* ---------- Cards ---------- */
+let deck = [];
+function startCards(){
+  deck = shuffle(pool());
+  updateKnownProg(); showCard();
+}
+function showCard(){
+  stage.className = 'card'; stage.innerHTML = '';
+  if (!deck.length){
+    stage.className = 'card done';
+    stage.append(el('p', { className: 'big', textContent: '🎉' }), el('h2', { textContent: 'Все карточки пройдены!' }),
+      el('p', { className: 'hint', textContent: 'Выучено семей: ' + known.size + ' из ' + FAMILIES.length }));
+    const again = el('button', { type: 'button', className: 'btn primary', textContent: 'Ещё раз' }); again.id = 'cards-again';
+    again.onclick = startCards; stage.append(again); return;
+  }
+  const f = deck[0];
+  stage.append(el('p', { className: 'hint', textContent: 'Осталось карточек: ' + deck.length + (known.has(f.base) ? ' · уже выучено' : '') }),
+    el('p', { className: 'base', textContent: f.base }),
+    el('p', { className: 'hint', textContent: 'Вспомни, какие слова можно образовать, потом открой карточку.' }));
+  const flip = el('button', { type: 'button', className: 'btn primary flip', textContent: 'Показать слова' }); flip.id = 'card-flip';
+  flip.onclick = () => {
+    flip.remove();
+    const list = el('div', { className: 'list' });
+    f.words.forEach(x => list.append(el('div', {}, el('b', { textContent: x.w }), el('span', { textContent: '— ' + x.t }))));
+    const yes = el('button', { type: 'button', className: 'btn good', textContent: 'Знаю' }); yes.id = 'card-yes';
+    const no = el('button', { type: 'button', className: 'btn again', textContent: 'Повторить' }); no.id = 'card-no';
+    yes.onclick = () => { known.add(f.base); saveKnown(); deck.shift(); updateKnownProg(); showCard(); };
+    no.onclick = () => { known.delete(f.base); saveKnown(); deck.push(deck.shift()); updateKnownProg(); showCard(); };
+    stage.append(list, el('div', { className: 'row' }, yes, no));
+    yes.focus();
+  };
+  stage.append(flip);
+}
+
+/* ---------- Quiz helpers ---------- */
+let quiz = [], qi = 0, score = 0, wrongs = [];
+function quizItems(){
+  const bases = new Set(pool().map(f => f.base));
+  return shuffle(ITEMS.filter(x => bases.has(x.base))).slice(0, 10);
+}
+function finishQuiz(){
+  stage.className = 'card done'; stage.innerHTML = ''; setProg(1);
+  stage.append(el('p', { className: 'big', textContent: score + ' / ' + quiz.length }),
+    el('h2', { textContent: score === quiz.length ? 'Идеально!' : score >= quiz.length * 0.7 ? 'Отлично!' : 'Повтори карточки и попробуй ещё' }));
+  if (wrongs.length){
+    const list = el('div', { className: 'list', style: 'width:100%;text-align:left' });
+    wrongs.forEach(x => list.append(el('div', {}, el('span', { textContent: x.base + ' →' }), el('b', { textContent: x.w }), el('span', { textContent: '— ' + x.t }))));
+    stage.append(el('p', { className: 'hint', textContent: 'Слова с ошибками:' }), list);
+  }
+  const again = el('button', { type: 'button', className: 'btn primary', textContent: 'Новый тест (10 слов)' }); again.id = 'quiz-again';
+  again.onclick = () => (mode === 'type' ? startType() : startChoice()); stage.append(again);
+}
+
+/* ---------- Type the word ---------- */
+function startType(){ quiz = quizItems(); qi = 0; score = 0; wrongs = []; showType(); }
+function showType(){
+  if (qi >= quiz.length) return finishQuiz();
+  setProg(qi / quiz.length);
+  const x = quiz[qi]; stage.className = 'card'; stage.innerHTML = '';
+  const input = el('input', { type: 'text', id: 'type-answer', autocomplete: 'off', autocapitalize: 'off', spellcheck: false, placeholder: 'Напиши слово по-английски' });
+  input.setAttribute('aria-label', 'Ответ');
+  const check = el('button', { type: 'button', className: 'btn primary', textContent: 'Проверить' }); check.id = 'type-check';
+  const fb = el('div'); fb.hidden = true;
+  stage.append(el('p', { className: 'hint', textContent: 'Вопрос ' + (qi + 1) + ' из ' + quiz.length }),
+    el('p', { className: 'base', textContent: x.base }),
+    el('p', { className: 'q-ru', textContent: '→ ' + x.t }), input, el('div', { className: 'row' }, check), fb);
+  let answered = false;
+  const go = () => {
+    if (answered){ qi++; showType(); return; }
+    const v = input.value.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!v) { input.focus(); return; }
+    answered = true; input.disabled = true;
+    const ok = v === x.w.toLowerCase();
+    if (ok) score++; else wrongs.push(x);
+    fb.hidden = false; fb.className = 'fb ' + (ok ? 'ok' : 'no');
+    fb.textContent = ok ? 'Верно! ' + x.w : 'Правильно: ' + x.w + (v ? ' (у тебя: ' + v + ')' : '');
+    check.textContent = qi + 1 < quiz.length ? 'Дальше' : 'Результат'; check.focus();
+  };
+  check.onclick = go;
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  input.focus();
+}
+
+/* ---------- Choose the translation ---------- */
+function startChoice(){ quiz = quizItems(); qi = 0; score = 0; wrongs = []; showChoice(); }
+function showChoice(){
+  if (qi >= quiz.length) return finishQuiz();
+  setProg(qi / quiz.length);
+  const x = quiz[qi]; stage.className = 'card'; stage.innerHTML = '';
+  const others = shuffle(ITEMS.filter(i => i.t !== x.t && i.w !== x.w)).slice(0, 3);
+  const opts = shuffle([x, ...others]);
+  const box = el('div', { className: 'choices' }); const fb = el('div'); fb.hidden = true;
+  const next = el('button', { type: 'button', className: 'btn primary', textContent: qi + 1 < quiz.length ? 'Дальше' : 'Результат' }); next.id = 'choice-next'; next.hidden = true;
+  next.onclick = () => { qi++; showChoice(); };
+  opts.forEach((o, k) => {
+    const b = el('button', { type: 'button', textContent: o.t }); b.id = 'choice-' + k;
+    b.onclick = () => {
+      [...box.children].forEach((c, j) => { c.disabled = true; if (opts[j] === x) c.classList.add('correct'); });
+      const ok = o === x; if (ok) score++; else { b.classList.add('wrong'); wrongs.push(x); }
+      fb.hidden = false; fb.className = 'fb ' + (ok ? 'ok' : 'no'); fb.textContent = (ok ? 'Верно! ' : 'Не совсем. ') + x.w + ' — ' + x.t;
+      next.hidden = false; next.focus();
+    };
+    box.append(b);
+  });
+  stage.append(el('p', { className: 'hint', textContent: 'Вопрос ' + (qi + 1) + ' из ' + quiz.length + ' · от слова ' + x.base }),
+    el('p', { className: 'base', style: 'color:var(--blue)', textContent: x.w }), box, fb, el('div', { className: 'row' }, next));
+}
+
+/* ---------- Tabs ---------- */
+const tabs = { cards: 'tab-cards', type: 'tab-type', choice: 'tab-choice' };
+function start(){ if (!pool().length){ stage.className = 'card done'; stage.innerHTML = ''; stage.append(el('h2', { textContent: 'Все слова в этой группе выучены!' }), el('p', { className: 'hint', textContent: 'Выбери другую группу слов.' })); setProg(1); return; }
+  ({ cards: startCards, type: startType, choice: startChoice })[mode](); }
+Object.entries(tabs).forEach(([m, id]) => document.getElementById(id).addEventListener('click', () => {
+  mode = m; Object.values(tabs).forEach(t => document.getElementById(t).setAttribute('aria-selected', t === id ? 'true' : 'false')); start();
+}));
+rangeSel.addEventListener('change', start);
+start();
+</script>
+</body>
+</html>

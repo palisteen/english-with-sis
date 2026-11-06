@@ -3,252 +3,101 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>If-предложения: Conditionals</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<title>English with Sis · ОГЭ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
-/* Layout: one narrow reading column; each conditional is a "switch" card split into IF-half and RESULT-half. */
+/* Layout: hero with the exam goal, then two shelves of cards: trainers and grammar topics. */
 :root{
   --bg:#FBF7F1; --surface:#FFFFFF; --fg:#22193A; --muted:#625A74; --line:#E7E0EC;
-  --if:#E2457E; --if-soft:#FCE6EE; --res:#3A57E8; --res-soft:#E6EBFD;
-  --sun:#F2C232; --sun-soft:#FDF3D2; --ok:#16936A; --ok-soft:#DDF4EB; --bad:#C8384A; --bad-soft:#FBE3E6;
-  --display:"Unbounded", "Arial Black", Arial, sans-serif;
-  --body:"Nunito", "Segoe UI", Arial, sans-serif;
+  --pink:#E2457E; --pink-soft:#FCE6EE; --blue:#3A57E8; --blue-soft:#E6EBFD;
+  --sun:#F2C232; --sun-soft:#FDF3D2; --mint:#16936A; --mint-soft:#DDF4EB;
+  --display:"Unbounded","Arial Black",Arial,sans-serif; --body:"Nunito","Segoe UI",Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
-  --if:#FF6FA3; --if-soft:#3A1F35; --res:#8EA2FF; --res-soft:#232A55;
-  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}}
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --mint:#4FD3A3; --mint-soft:#163A30; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
-  --if:#FF6FA3; --if-soft:#3A1F35; --res:#8EA2FF; --res-soft:#232A55;
-  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}
-
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --mint:#4FD3A3; --mint-soft:#163A30; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55;margin:0}
-.wrap{max-width:760px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:44px}
-h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
-h2{font-size:clamp(22px,4.5vw,28px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
 p{margin:0}
-.lead{color:var(--muted);font-size:18px;max-width:62ch}
 .eyebrow{font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.if{color:var(--if);font-weight:800}
-.res{color:var(--res);font-weight:800}
 
-/* hero */
-.hero{display:flex;flex-direction:column;gap:18px}
-.hero h1{font-size:clamp(34px,8vw,56px);font-weight:800}
-.switch{display:flex;flex-wrap:wrap;align-items:stretch;border-radius:22px;overflow:hidden;font-family:var(--display);font-weight:700;font-size:clamp(16px,3.4vw,21px)}
-.switch span{padding:18px 20px;flex:1 1 220px}
-.switch .a{background:var(--if);color:#fff}
-.switch .b{background:var(--res);color:#fff}
-.switch small{display:block;font-family:var(--body);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-bottom:4px}
+.hero{display:flex;flex-direction:column;gap:16px}
+.hero h1{font-size:clamp(34px,8vw,60px);font-weight:800}
+.hero h1 span{color:var(--pink)}
+.lead{color:var(--muted);font-size:18px;max-width:58ch}
+.goal{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.goal span{font-weight:800;font-size:15px;padding:8px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.goal b{font-family:var(--display);color:var(--blue)}
 
-/* section */
 section{display:flex;flex-direction:column;gap:16px}
-.rule{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
-.formula{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:800}
-.chip{display:inline-block;padding:5px 12px;border-radius:999px;font-weight:800;font-size:15px}
-.chip.if{background:var(--if-soft);color:var(--if)}
-.chip.res{background:var(--res-soft);color:var(--res)}
-.plus{color:var(--muted);font-weight:700}
-.ex{display:flex;flex-direction:column;gap:6px;padding-left:14px;border-left:3px solid var(--line)}
-.ex p{font-size:17px}
-.ex .ru{color:var(--muted);font-size:15px}
-.when{font-size:16px}
-.tag{font-family:var(--display);font-size:13px;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--sun-soft);color:var(--fg);align-self:flex-start}
-
-/* compare table */
-.tbl{overflow-x:auto;border-radius:16px;border:1px solid var(--line);background:var(--surface)}
-table{border-collapse:collapse;width:100%;min-width:520px;font-size:16px}
-th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-family:var(--display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
-tr:last-child td{border-bottom:none}
-td:first-child{font-family:var(--display);font-weight:700;white-space:nowrap}
-
-/* trap */
-.trap{background:var(--sun-soft);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
-.trap h3{font-size:18px}
-.wrong{text-decoration:line-through;color:var(--bad);font-weight:700}
-.right{color:var(--ok);font-weight:800}
-
-/* quiz */
-.q{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
-.q p{font-size:17px;font-weight:600}
-.q .num{font-family:var(--display);font-size:13px;color:var(--muted)}
-.opts{display:flex;flex-wrap:wrap;gap:8px}
-.opts button{font:inherit;font-weight:800;font-size:16px;padding:9px 16px;border-radius:999px;border:2px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer;transition:transform .12s, background .12s, border-color .12s}
-.opts button:hover{border-color:var(--res)}
-.opts button:focus-visible{outline:3px solid var(--res);outline-offset:2px}
-.opts button.correct{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
-.opts button.wrongpick{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
-.opts button:disabled{cursor:default}
-.fb{font-size:15px;color:var(--muted)}
-.fb b{color:var(--fg)}
-.score{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:var(--res);color:#fff;border-radius:18px;padding:16px 20px;font-family:var(--display);font-weight:700}
-.score button{font:inherit;font-size:14px;background:#fff;color:var(--res);border:none;border-radius:999px;padding:8px 16px;cursor:pointer}
-.score button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+section > h2{font-size:clamp(20px,4.5vw,26px)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{display:flex;flex-direction:column;gap:10px;padding:22px;border-radius:22px;text-decoration:none;color:var(--fg);border:2px solid transparent;transition:transform .15s, border-color .15s;min-width:0}
+a.card:hover{transform:translateY(-3px);border-color:var(--fg)}
+a.card:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.card h3{font-size:20px}
+.card p{color:var(--muted);font-size:15px}
+.card .tag{align-self:flex-start;font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:8px;background:var(--surface);color:var(--fg)}
+.card .go{margin-top:auto;font-weight:800;color:var(--fg)}
+.c-pink{background:var(--pink-soft)} .c-blue{background:var(--blue-soft)} .c-sun{background:var(--sun-soft)} .c-mint{background:var(--mint-soft)}
+.soon{background:transparent;border:2px dashed var(--line)}
+.soon h3,.soon p{color:var(--muted)}
 footer{color:var(--muted);font-size:14px;text-align:center}
-@media (prefers-reduced-motion: reduce){.opts button{transition:none}}
-.pop{animation:pop .25s ease}
-@keyframes pop{50%{transform:scale(1.06)}}
-@media (prefers-reduced-motion: reduce){.pop{animation:none}}
+@media (prefers-reduced-motion: reduce){.card{transition:none} a.card:hover{transform:none}}
 </style>
 </head>
 <body>
-
 <div class="wrap">
 
   <header class="hero">
-    <span class="eyebrow">English with Sis · грамматика ОГЭ</span>
-    <h1>Conditionals: <span class="if">if</span> → <span class="res">then</span></h1>
-    <p class="lead">Условное предложение — это две половинки. Первая говорит «<b>если</b>…», вторая — «<b>то</b>…». Весь секрет в том, какое время стоит в каждой половинке.</p>
-    <div class="switch" aria-label="Пример: If it rains, we will stay at home">
-      <span class="a"><small>если (условие)</small>If it rains,</span>
-      <span class="b"><small>то (результат)</small>we will stay at home.</span>
+    <span class="eyebrow">English with Sis</span>
+    <h1>Готовимся к <span>ОГЭ</span> по английскому</h1>
+    <p class="lead">Здесь собраны тренажёры и объяснения тем, которые мы проходим на занятиях. Новые темы появляются каждую неделю.</p>
+    <div class="goal">
+      <span>Цель: <b>58+</b> баллов из 68</span>
+      <span>Это оценка <b>«5»</b></span>
     </div>
   </header>
 
-  <section>
-    <span class="tag">Тип 0 · Zero Conditional</span>
-    <h2>Факты, которые верны всегда</h2>
-    <div class="rule">
-      <div class="formula"><span class="chip if">If + Present Simple</span><span class="plus">,</span><span class="chip res">Present Simple</span></div>
-      <p class="when">Законы природы, правила, привычки. «Если» здесь можно заменить на «когда».</p>
-      <div class="ex">
-        <p><span class="if">If you heat</span> ice, it <span class="res">melts</span>.</p>
-        <p class="ru">Если нагреть лёд, он тает. (всегда)</p>
-      </div>
+  <section aria-labelledby="h-trainers">
+    <h2 id="h-trainers">Тренажёры</h2>
+    <div class="grid">
+      <a class="card c-pink" href="words.html">
+        <span class="tag">Задания 29–34</span>
+        <h3>Word Formation</h3>
+        <p>Учим слова для словообразования: карточки, тест «напиши слово» как на экзамене и выбор перевода.</p>
+        <span class="go">Открыть тренажёр →</span>
+      </a>
     </div>
   </section>
 
-  <section>
-    <span class="tag">Тип 1 · First Conditional</span>
-    <h2>Реальное будущее</h2>
-    <div class="rule">
-      <div class="formula"><span class="chip if">If + Present Simple</span><span class="plus">,</span><span class="chip res">will + глагол</span></div>
-      <p class="when">Вполне возможная ситуация в будущем. Это самый частый тип в ОГЭ.</p>
-      <div class="ex">
-        <p><span class="if">If it rains</span> tomorrow, we <span class="res">will stay</span> at home.</p>
-        <p class="ru">Если завтра пойдёт дождь, мы останемся дома.</p>
-      </div>
-      <div class="ex">
-        <p><span class="if">If I break</span> my promise, mum <span class="res">will get</span> upset.</p>
-        <p class="ru">Если я нарушу обещание, мама расстроится.</p>
-      </div>
-    </div>
-    <div class="trap">
-      <h3>Главная ловушка</h3>
-      <p>По-русски мы говорим «если <b>пойдёт</b> дождь» — в будущем. А в английском после <b>if</b> будущее время <b>не ставим</b>, только Present Simple.</p>
-      <p><span class="wrong">If it will rain</span> → <span class="right">If it rains</span></p>
-    </div>
-  </section>
-
-  <section>
-    <span class="tag">Тип 2 · Second Conditional</span>
-    <h2>Мечты и «если бы»</h2>
-    <div class="rule">
-      <div class="formula"><span class="chip if">If + Past Simple</span><span class="plus">,</span><span class="chip res">would + глагол</span></div>
-      <p class="when">Нереальная или маловероятная ситуация сейчас. По-русски — «если бы…, то бы…». Глагол после <b>if</b> выглядит как прошедшее время, но речь о настоящем.</p>
-      <div class="ex">
-        <p><span class="if">If I had</span> more free time, I <span class="res">would learn</span> Spanish.</p>
-        <p class="ru">Если бы у меня было больше времени, я бы учила испанский.</p>
-      </div>
-      <div class="ex">
-        <p><span class="if">If I were</span> you, I <span class="res">would watch</span> this series.</p>
-        <p class="ru">На твоём месте я бы посмотрела этот сериал. (с <b>if</b> часто пишут <b>were</b> для всех лиц)</p>
+  <section aria-labelledby="h-grammar">
+    <h2 id="h-grammar">Грамматика</h2>
+    <div class="grid">
+      <a class="card c-blue" href="conditionals.html">
+        <span class="tag">Задания 20–28</span>
+        <h3>Conditionals</h3>
+        <p>Условные предложения: типы 0–3, ловушки ОГЭ и мини-тест на 8 вопросов.</p>
+        <span class="go">Читать тему →</span>
+      </a>
+      <div class="card soon" aria-label="Скоро новая тема">
+        <span class="tag">Скоро</span>
+        <h3>Следующая тема</h3>
+        <p>Появится после следующего занятия.</p>
       </div>
     </div>
-    <div class="trap">
-      <h3>Подсказка для ОГЭ</h3>
-      <p>Видишь во второй половине <b>would</b> → после <b>if</b> ставь прошедшую форму: <span class="right">had, went, knew, were</span>.</p>
-      <p>То же правило после <b>I wish</b>: <span class="right">I wish you had another hobby!</span> — «Жаль, что у тебя нет другого хобби».</p>
-    </div>
-  </section>
-
-  <section>
-    <span class="tag">Тип 3 · Third Conditional</span>
-    <h2>Сожаление о прошлом</h2>
-    <div class="rule">
-      <div class="formula"><span class="chip if">If + had + 3-я форма</span><span class="plus">,</span><span class="chip res">would have + 3-я форма</span></div>
-      <p class="when">Прошлое, которое уже не изменить. В ОГЭ встречается редко, достаточно узнавать его.</p>
-      <div class="ex">
-        <p><span class="if">If I had known</span>, I <span class="res">would have helped</span> you.</p>
-        <p class="ru">Если бы я знала (тогда), я бы помогла тебе.</p>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2>Все типы в одной таблице</h2>
-    <div class="tbl">
-      <table>
-        <thead><tr><th>Тип</th><th>Часть с if</th><th>Вторая часть</th><th>Когда</th></tr></thead>
-        <tbody>
-          <tr><td>0</td><td class="if">Present Simple</td><td class="res">Present Simple</td><td>всегда правда</td></tr>
-          <tr><td>1</td><td class="if">Present Simple</td><td class="res">will + глагол</td><td>реально в будущем</td></tr>
-          <tr><td>2</td><td class="if">Past Simple</td><td class="res">would + глагол</td><td>«если бы» сейчас</td></tr>
-          <tr><td>3</td><td class="if">had + 3-я форма</td><td class="res">would have + 3-я форма</td><td>«если бы» в прошлом</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="lead">Половинки можно менять местами: <i>We will stay at home if it rains.</i> Запятая нужна, только когда <b>if</b> стоит в начале.</p>
-  </section>
-
-  <section aria-labelledby="quiz-h">
-    <h2 id="quiz-h">Проверь себя</h2>
-    <p class="lead">Выбери правильную форму. Сразу увидишь, верно или нет, и почему.</p>
-    <div id="quiz" style="display:flex;flex-direction:column;gap:12px"></div>
-    <div class="score" aria-live="polite"><span id="score">0 из 8</span><button type="button" id="reset">Пройти заново</button></div>
   </section>
 
   <footer>Сделано для наших занятий · удачи на ОГЭ!</footer>
 </div>
-
-<script>
-const QUIZ=[
- {q:"If you ____ water to 100 °C, it boils.",o:["heat","will heat","heated"],a:0,why:"Факт, который верен всегда → Тип 0: Present Simple в обеих частях."},
- {q:"If it ____ tomorrow, we will stay at home.",o:["will rain","rains","rained"],a:1,why:"После if будущее не ставим: will во второй части → Тип 1, после if Present Simple."},
- {q:"If I see Kate, I ____ her the news.",o:["tell","would tell","will tell"],a:2,why:"Реальная ситуация в будущем → Тип 1: will + глагол."},
- {q:"If I ____ more money, I would buy a new phone.",o:["have","had","will have"],a:1,why:"Во второй части would → Тип 2: после if прошедшая форма (had)."},
- {q:"If she studied harder, she ____ better marks.",o:["would get","will get","gets"],a:0,why:"После if Past Simple (studied) → Тип 2: would + глагол."},
- {q:"If I ____ you, I would call him.",o:["am","was being","were"],a:2,why:"Классика Типа 2: If I were you… — «на твоём месте»."},
- {q:"I wish you ____ another hobby!",o:["have","had","will have"],a:1,why:"После I wish ставим прошедшую форму, как в Типе 2."},
- {q:"If he doesn't hurry, he ____ the bus.",o:["will miss","would miss","misses"],a:0,why:"Реальное будущее (doesn't hurry — Present Simple) → will + глагол."}
-];
-const box=document.getElementById('quiz'), scoreEl=document.getElementById('score');
-let answered=0, right=0;
-function render(){
-  box.innerHTML=''; answered=0; right=0; scoreEl.textContent='0 из '+QUIZ.length;
-  QUIZ.forEach((item,i)=>{
-    const card=document.createElement('div'); card.className='q';
-    const [before,after]=item.q.split('____');
-    card.innerHTML='<span class="num">'+(i+1)+' / '+QUIZ.length+'</span><p></p><div class="opts" role="group"></div><p class="fb" hidden></p>';
-    const p=card.querySelector('p');
-    p.append(before); const gap=document.createElement('b'); gap.textContent='______'; p.append(gap, after);
-    const opts=card.querySelector('.opts'), fb=card.querySelector('.fb');
-    opts.setAttribute('aria-label','Варианты к вопросу '+(i+1));
-    item.o.forEach((txt,j)=>{
-      const b=document.createElement('button'); b.type='button'; b.id='q'+i+'o'+j; b.textContent=txt;
-      b.addEventListener('click',()=>{
-        const ok=j===item.a;
-        [...opts.children].forEach((x,k)=>{x.disabled=true; if(k===item.a) x.classList.add('correct');});
-        if(!ok) b.classList.add('wrongpick');
-        b.classList.add('pop');
-        gap.textContent=item.o[item.a]; gap.className=ok?'right':'res';
-        fb.hidden=false; fb.innerHTML='<b>'+(ok?'Верно! ':'Не совсем. ')+'</b>'; fb.append(item.why);
-        answered++; if(ok) right++;
-        scoreEl.textContent=right+' из '+QUIZ.length+(answered===QUIZ.length?(right===QUIZ.length?' — идеально!':right>=6?' — отлично!':' — разбери ошибки и попробуй ещё'):'');
-      });
-      opts.append(b);
-    });
-    box.append(card);
-  });
-}
-document.getElementById('reset').addEventListener('click',render);
-render();
-</script>
 </body>
 </html>
