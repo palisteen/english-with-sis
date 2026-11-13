@@ -227,6 +227,11 @@ function pickVoices(){
 }
 if (TTS){ pickVoices(); speechSynthesis.onvoiceschanged = pickVoices; }
 let stopFlag = false;
+/* Recorded audio files (audio-t1.mp3 …) play first; browser speech is only a fallback. */
+const AUD = {};
+function audioFor(t){ if (!AUD[t.id]){ const a = new Audio("audio-" + t.id + ".mp3"); a.preload = "auto"; AUD[t.id] = a; } return AUD[t.id]; }
+function stopAudio(){ Object.values(AUD).forEach(a => { try { a.pause(); a.currentTime = 0; } catch(e){} }); }
+const mmss = x => isFinite(x) ? Math.floor(x / 60) + ":" + String(Math.floor(x % 60)).padStart(2, "0") : "…";
 function sentences(t){ return t.match(/[^.!?]+[.!?]+["']?|[^.!?]+$/g) || [t]; }
 function sayOne(text, role){
   return new Promise(res => {
@@ -255,6 +260,7 @@ function h(tag, attrs, ...kids){ const e = document.createElement(tag); if (attr
 
 function renderList(){
   if (TTS) speechSynthesis.cancel();
+  stopAudio();
   app.innerHTML = "";
   const results = store("ews-listen-results") || {};
   const nameIn = h("input", {type:"text", id:"student-name", placeholder:"Твоё имя", value:store("ews-name") || ""});
@@ -271,15 +277,15 @@ function renderList(){
   put(
     h("div", {class:"top"}, h("a", {href:"index.html"}, "← На главную"), h("span", {class:"hint"}, "Задания 1–11 · 15 баллов")),
     h("header", {style:"display:flex;flex-direction:column;gap:8px"}, h("h1", null, "Listening: тренажёр"),
-      h("p", {class:"lead"}, "Аудирование в формате ОГЭ: слушаешь запись два раза и сразу отвечаешь. Тексты читает голос браузера, поэтому включи звук.")),
+      h("p", {class:"lead"}, "Аудирование в формате ОГЭ: слушаешь запись два раза и сразу отвечаешь. Включи звук и сначала прочитай задания.")),
     h("div", {class:"name"}, h("label", {for:"student-name"}, "Имя для результата:"), nameIn),
-    !TTS ? h("p", {class:"warn"}, "Этот браузер не умеет озвучивать текст. Открой страницу в Chrome или Safari.") : null,
     list,
     h("footer", null, "Тексты составлены в формате заданий ФИПИ · English with Sis"));
 }
 
 function renderTraining(t){
   if (TTS) speechSynthesis.cancel();
+  stopAudio();
   stopFlag = false;
   app.innerHTML = "";
   const idx = TRAININGS.indexOf(t);
@@ -291,12 +297,24 @@ function renderTraining(t){
   const stopBtn = h("button", {type:"button", class:"btn", id:"stop", disabled:true}, "■ Стоп");
   function paintDots(){ [...dots.children].forEach((d, i) => d.classList.toggle("on", i < listens)); }
   async function play(){
-    if (!TTS) return;
     if (examChk.checked && listens >= 2) return;
     listens++; paintDots();
     playBtn.disabled = true; stopBtn.disabled = false; stopFlag = false;
-    speechSynthesis.cancel(); pickVoices();
-    const segs = segments(t);
+    const a = audioFor(t);
+    let ok = true;
+    try { a.currentTime = 0; await a.play(); } catch(e){ ok = false; }
+    if (ok){
+      await new Promise(res => {
+        const tick = () => { status.textContent = "Звучит запись · " + mmss(a.currentTime) + " / " + mmss(a.duration) + " · прослушивание " + listens + " из 2"; };
+        tick(); a.ontimeupdate = tick;
+        a.onended = res; a.onpause = res; a.onerror = res;
+      });
+      a.ontimeupdate = a.onended = a.onpause = a.onerror = null;
+    } else if (!TTS){
+      status.textContent = "Не получилось включить звук. Обнови страницу или открой её в другом браузере.";
+      listens--; paintDots(); playBtn.disabled = false; stopBtn.disabled = true; return;
+    } else { speechSynthesis.cancel(); pickVoices(); }
+    const segs = ok ? [] : segments(t);
     for (const s of segs){
       if (stopFlag) break;
       status.innerHTML = ""; status.append("Звучит: ", h("b", null, s.label), " · прослушивание " + listens + " из 2");
@@ -311,7 +329,7 @@ function renderTraining(t){
     playBtn.textContent = "▶ Слушать ещё раз";
   }
   playBtn.onclick = play;
-  stopBtn.onclick = () => { stopFlag = true; if (TTS) speechSynthesis.cancel(); };
+  stopBtn.onclick = () => { stopFlag = true; stopAudio(); if (TTS) speechSynthesis.cancel(); };
   examChk.onchange = () => { playBtn.disabled = examChk.checked && listens >= 2; };
 
   const form = h("div", {class:"box"});
@@ -366,7 +384,7 @@ function renderTraining(t){
   const checkBtn = h("button", {type:"button", class:"btn pink", id:"check"}, "Проверить");
   const out = h("div");
   checkBtn.onclick = () => {
-    stopFlag = true; if (TTS) speechSynthesis.cancel();
+    stopFlag = true; stopAudio(); if (TTS) speechSynthesis.cancel();
     const res = check(); const score = res.filter(Boolean).length;
     const all = store("ews-listen-results") || {};
     const prev = all[t.id]; all[t.id] = {best:Math.max(score, prev ? prev.best : 0), max:res.length}; store("ews-listen-results", all);
@@ -391,7 +409,6 @@ function renderTraining(t){
     h("div", {class:"top"}, h("a", {href:"#"}, "← Все тренировки"), h("span", {class:"tag " + t.tag}, TAGS[t.tag])),
     h("h1", null, "Тренировка " + (idx + 1) + ": " + t.title),
     h("p", {class:"instr"}, t.instr),
-    !TTS ? h("p", {class:"warn"}, "Этот браузер не умеет озвучивать текст. Открой страницу в Chrome или Safari.") : null,
     h("div", {class:"box"},
       h("div", {class:"player"}, playBtn, stopBtn, dots),
       status,
