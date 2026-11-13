@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Perfect Tenses</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: one narrow reading column; each conditional is a "switch" card split into IF-half and RESULT-half. */
+:root{
+  --bg:#FBF7F1; --surface:#FFFFFF; --fg:#22193A; --muted:#625A74; --line:#E7E0EC;
+  --if:#E2457E; --if-soft:#FCE6EE; --res:#3A57E8; --res-soft:#E6EBFD;
+  --sun:#F2C232; --sun-soft:#FDF3D2; --ok:#16936A; --ok-soft:#DDF4EB; --bad:#C8384A; --bad-soft:#FBE3E6;
+  --display:"Unbounded", "Arial Black", Arial, sans-serif;
+  --body:"Nunito", "Segoe UI", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --if:#FF6FA3; --if-soft:#3A1F35; --res:#8EA2FF; --res-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --if:#FF6FA3; --if-soft:#3A1F35; --res:#8EA2FF; --res-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55;margin:0}
+.wrap{max-width:760px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h2{font-size:clamp(22px,4.5vw,28px)}
+p{margin:0}
+.lead{color:var(--muted);font-size:18px;max-width:62ch}
+.eyebrow{font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.if{color:var(--if);font-weight:800}
+.res{color:var(--res);font-weight:800}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:18px}
+.hero h1{font-size:clamp(34px,8vw,56px);font-weight:800}
+.switch{display:flex;flex-wrap:wrap;align-items:stretch;border-radius:22px;overflow:hidden;font-family:var(--display);font-weight:700;font-size:clamp(16px,3.4vw,21px)}
+.switch span{padding:18px 20px;flex:1 1 220px}
+.switch .a{background:var(--if);color:#fff}
+.switch .b{background:var(--res);color:#fff}
+.switch small{display:block;font-family:var(--body);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-bottom:4px}
+
+/* section */
+section{display:flex;flex-direction:column;gap:16px}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.formula{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:800}
+.chip{display:inline-block;padding:5px 12px;border-radius:999px;font-weight:800;font-size:15px}
+.chip.if{background:var(--if-soft);color:var(--if)}
+.chip.res{background:var(--res-soft);color:var(--res)}
+.plus{color:var(--muted);font-weight:700}
+.ex{display:flex;flex-direction:column;gap:6px;padding-left:14px;border-left:3px solid var(--line)}
+.ex p{font-size:17px}
+.ex .ru{color:var(--muted);font-size:15px}
+.when{font-size:16px}
+.tag{font-family:var(--display);font-size:13px;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--sun-soft);color:var(--fg);align-self:flex-start}
+
+/* compare table */
+.tbl{overflow-x:auto;border-radius:16px;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:16px}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+tr:last-child td{border-bottom:none}
+td:first-child{font-family:var(--display);font-weight:700;white-space:nowrap}
+
+/* trap */
+.trap{background:var(--sun-soft);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.trap h3{font-size:18px}
+.wrong{text-decoration:line-through;color:var(--bad);font-weight:700}
+.right{color:var(--ok);font-weight:800}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.q p{font-size:17px;font-weight:600}
+.q .num{font-family:var(--display);font-size:13px;color:var(--muted)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts button{font:inherit;font-weight:800;font-size:16px;padding:9px 16px;border-radius:999px;border:2px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer;transition:transform .12s, background .12s, border-color .12s}
+.opts button:hover{border-color:var(--res)}
+.opts button:focus-visible{outline:3px solid var(--res);outline-offset:2px}
+.opts button.correct{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.opts button.wrongpick{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.opts button:disabled{cursor:default}
+.fb{font-size:15px;color:var(--muted)}
+.fb b{color:var(--fg)}
+.score{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:var(--res);color:#fff;border-radius:18px;padding:16px 20px;font-family:var(--display);font-weight:700}
+.score button{font:inherit;font-size:14px;background:#fff;color:var(--res);border:none;border-radius:999px;padding:8px 16px;cursor:pointer}
+.score button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+footer{color:var(--muted);font-size:14px;text-align:center}
+@media (prefers-reduced-motion: reduce){.opts button{transition:none}}
+.pop{animation:pop .25s ease}
+@keyframes pop{50%{transform:scale(1.06)}}
+@media (prefers-reduced-motion: reduce){.pop{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><span class="eyebrow">English with Sis · грамматика ОГЭ</span><a href="index.html" style="color:var(--res);font-weight:800;text-decoration:none">← На главную</a></div>
+    <h1>Perfect Tenses: <span class="res">have</span> / <span class="if">had</span> + 3-я форма</h1>
+    <p class="lead">Перфект показывает, что действие уже <b>завершилось</b> к какому-то моменту. Present Perfect — к моменту «сейчас», Past Perfect — к моменту в прошлом.</p>
+    <div class="switch" aria-label="I have finished my homework. When Mum came, I had finished my homework.">
+      <span class="a"><small>к моменту «сейчас»</small>I have finished.</span>
+      <span class="b"><small>к моменту в прошлом</small>I had finished.</span>
+    </div>
+  </header>
+
+  <section>
+    <span class="tag">Present Perfect</span>
+    <h2>Уже сделал, результат важен сейчас</h2>
+    <div class="rule">
+      <div class="formula"><span class="chip if">have / has</span><span class="plus">+</span><span class="chip res">3-я форма</span></div>
+      <p class="when">Опыт в жизни, результат на сегодня, действие, которое длится до сих пор. Слова-подсказки: <b>already, just, yet, ever, never, since, for, recently</b>.</p>
+      <div class="ex"><p>I <span class="res">have already finished</span> my homework.</p><p class="ru">Я уже сделала домашку (и она готова сейчас).</p></div><div class="ex"><p>She <span class="res">has never been</span> to London.</p><p class="ru">Она никогда не была в Лондоне.</p></div><div class="ex"><p>We <span class="res">have known</span> each other for five years.</p><p class="ru">Мы знакомы пять лет (и до сих пор).</p></div>
+    </div>
+    <div class="trap"><h3>Since или for?</h3><p><b>since</b> + точка отсчёта: since 2020, since Monday, since I was ten.</p><p><b>for</b> + отрезок времени: for five years, for two weeks, for a long time.</p></div>
+  </section>
+
+  <section>
+    <div class="trap">
+      <h3>Главная ловушка: Present Perfect или Past Simple?</h3>
+      <p>Если названо <b>точное время в прошлом</b> — yesterday, last week, in 2020, two days ago, when I was a child — ставим Past Simple.</p>
+      <p><span class="wrong">I have seen this film yesterday</span> → <span class="right">I saw this film yesterday</span></p>
+      <p>Если времени нет, а важен результат или опыт — Present Perfect: <span class="right">I have seen this film</span> (я его видела, знаю, о чём он).</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="tag">Past Perfect</span>
+    <h2>Случилось раньше другого действия в прошлом</h2>
+    <div class="rule">
+      <div class="formula"><span class="chip if">had</span><span class="plus">+</span><span class="chip res">3-я форма</span></div>
+      <p class="when">Когда рассказ уже в прошлом, а нужно показать, что одно случилось <b>ещё раньше</b>. Подсказки: <b>before, after, by the time, already</b> в рассказе о прошлом.</p>
+      <div class="ex"><p>When we came to the cinema, the film <span class="res">had already started</span>.</p><p class="ru">Когда мы пришли, фильм уже начался (сначала начался фильм, потом пришли мы).</p></div><div class="ex"><p>She said that she <span class="res">had lost</span> her keys.</p><p class="ru">Она сказала, что потеряла ключи.</p></div>
+    </div>
+    <div class="trap"><h3>Как увидеть Past Perfect</h3><p>Нарисуй линию времени: какое действие было первым? Первое (более раннее) → <b>had + V3</b>, второе → Past Simple.</p><p>After she <span class="right">had cooked</span> dinner, she went for a walk.</p></div>
+  </section>
+
+  <section>
+    <h2>Всё в одной таблице</h2>
+    <div class="tbl"><table><thead><tr><th>Время</th><th>Формула</th><th>Подсказки</th><th>Пример</th></tr></thead><tbody><tr><td>Present Perfect</td><td>have / has + V3</td><td>already, just, yet, ever, never, since, for</td><td>I have done it</td></tr><tr><td>Past Simple (для сравнения)</td><td>V2 / -ed</td><td>yesterday, ago, last, in 2020</td><td>I did it yesterday</td></tr><tr><td>Past Perfect</td><td>had + V3</td><td>before, after, by the time + прошлое</td><td>I had done it before he came</td></tr></tbody></table></div>
+  </section>
+
+  <section aria-labelledby="quiz-h">
+    <h2 id="quiz-h">Проверь себя</h2>
+    <p class="lead">Выбери правильную форму. Сразу увидишь, верно или нет, и почему.</p>
+    <div id="quiz" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="score" aria-live="polite"><span id="score">0 из 8</span><button type="button" id="reset">Пройти заново</button></div>
+  </section>
+
+  <footer>Сделано для наших занятий · удачи на ОГЭ!</footer>
+</div>
+
+<script>
+const QUIZ=[
+{
+"q": "I ____ my homework already.",
+"o": [
+"have finished",
+"finished",
+"had finished"
+],
+"a": 0,
+"why": "already, результат сейчас → Present Perfect."
+},
+{
+"q": "We ____ to Paris last summer.",
+"o": [
+"have been",
+"went",
+"had gone"
+],
+"a": 1,
+"why": "last summer — точное время в прошлом → Past Simple."
+},
+{
+"q": "She ____ in Sochi since 2020.",
+"o": [
+"lives",
+"has lived",
+"lived"
+],
+"a": 1,
+"why": "since 2020 и до сих пор → Present Perfect."
+},
+{
+"q": "Have you ever ____ sushi?",
+"o": [
+"ate",
+"eat",
+"eaten"
+],
+"a": 2,
+"why": "После have — 3-я форма: eat — ate — eaten."
+},
+{
+"q": "When I came to the cinema, the film ____ already.",
+"o": [
+"started",
+"has started",
+"had started"
+],
+"a": 2,
+"why": "Фильм начался раньше, чем я пришла (в прошлом) → Past Perfect."
+},
+{
+"q": "Tom ____ his keys, so he can't open the door now.",
+"o": [
+"has lost",
+"lost",
+"had lost"
+],
+"a": 0,
+"why": "Результат важен сейчас (не может открыть дверь) → Present Perfect."
+},
+{
+"q": "I have known Kate ____ five years.",
+"o": [
+"since",
+"for",
+"ago"
+],
+"a": 1,
+"why": "five years — отрезок времени → for."
+},
+{
+"q": "After she ____ dinner, she went for a walk.",
+"o": [
+"had cooked",
+"has cooked",
+"cooks"
+],
+"a": 0,
+"why": "Сначала приготовила, потом пошла гулять → Past Perfect для более раннего действия."
+}
+];
+const box=document.getElementById('quiz'), scoreEl=document.getElementById('score');
+let answered=0, right=0;
+function render(){
+  box.innerHTML=''; answered=0; right=0; scoreEl.textContent='0 из '+QUIZ.length;
+  QUIZ.forEach((item,i)=>{
+    const card=document.createElement('div'); card.className='q';
+    const [before,after]=item.q.split('____');
+    card.innerHTML='<span class="num">'+(i+1)+' / '+QUIZ.length+'</span><p></p><div class="opts" role="group"></div><p class="fb" hidden></p>';
+    const p=card.querySelector('p');
+    p.append(before); const gap=document.createElement('b'); gap.textContent='______'; p.append(gap, after);
+    const opts=card.querySelector('.opts'), fb=card.querySelector('.fb');
+    opts.setAttribute('aria-label','Варианты к вопросу '+(i+1));
+    item.o.forEach((txt,j)=>{
+      const b=document.createElement('button'); b.type='button'; b.id='q'+i+'o'+j; b.textContent=txt;
+      b.addEventListener('click',()=>{
+        const ok=j===item.a;
+        [...opts.children].forEach((x,k)=>{x.disabled=true; if(k===item.a) x.classList.add('correct');});
+        if(!ok) b.classList.add('wrongpick');
+        b.classList.add('pop');
+        gap.textContent=item.o[item.a]; gap.className=ok?'right':'res';
+        fb.hidden=false; fb.innerHTML='<b>'+(ok?'Верно! ':'Не совсем. ')+'</b>'; fb.append(item.why);
+        answered++; if(ok) right++;
+        scoreEl.textContent=right+' из '+QUIZ.length+(answered===QUIZ.length?(right===QUIZ.length?' — идеально!':right>=6?' — отлично!':' — разбери ошибки и попробуй ещё'):'');
+      });
+      opts.append(b);
+    });
+    box.append(card);
+  });
+}
+document.getElementById('reset').addEventListener('click',render);
+render();
+</script>
+</body>
+</html>

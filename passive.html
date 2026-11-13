@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Passive Voice</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: one narrow reading column; each conditional is a "switch" card split into IF-half and RESULT-half. */
+:root{
+  --bg:#FBF7F1; --surface:#FFFFFF; --fg:#22193A; --muted:#625A74; --line:#E7E0EC;
+  --if:#E2457E; --if-soft:#FCE6EE; --res:#3A57E8; --res-soft:#E6EBFD;
+  --sun:#F2C232; --sun-soft:#FDF3D2; --ok:#16936A; --ok-soft:#DDF4EB; --bad:#C8384A; --bad-soft:#FBE3E6;
+  --display:"Unbounded", "Arial Black", Arial, sans-serif;
+  --body:"Nunito", "Segoe UI", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --if:#FF6FA3; --if-soft:#3A1F35; --res:#8EA2FF; --res-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --if:#FF6FA3; --if-soft:#3A1F35; --res:#8EA2FF; --res-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55;margin:0}
+.wrap{max-width:760px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h2{font-size:clamp(22px,4.5vw,28px)}
+p{margin:0}
+.lead{color:var(--muted);font-size:18px;max-width:62ch}
+.eyebrow{font-family:var(--display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.if{color:var(--if);font-weight:800}
+.res{color:var(--res);font-weight:800}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:18px}
+.hero h1{font-size:clamp(34px,8vw,56px);font-weight:800}
+.switch{display:flex;flex-wrap:wrap;align-items:stretch;border-radius:22px;overflow:hidden;font-family:var(--display);font-weight:700;font-size:clamp(16px,3.4vw,21px)}
+.switch span{padding:18px 20px;flex:1 1 220px}
+.switch .a{background:var(--if);color:#fff}
+.switch .b{background:var(--res);color:#fff}
+.switch small{display:block;font-family:var(--body);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-bottom:4px}
+
+/* section */
+section{display:flex;flex-direction:column;gap:16px}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.formula{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:800}
+.chip{display:inline-block;padding:5px 12px;border-radius:999px;font-weight:800;font-size:15px}
+.chip.if{background:var(--if-soft);color:var(--if)}
+.chip.res{background:var(--res-soft);color:var(--res)}
+.plus{color:var(--muted);font-weight:700}
+.ex{display:flex;flex-direction:column;gap:6px;padding-left:14px;border-left:3px solid var(--line)}
+.ex p{font-size:17px}
+.ex .ru{color:var(--muted);font-size:15px}
+.when{font-size:16px}
+.tag{font-family:var(--display);font-size:13px;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--sun-soft);color:var(--fg);align-self:flex-start}
+
+/* compare table */
+.tbl{overflow-x:auto;border-radius:16px;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:16px}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+tr:last-child td{border-bottom:none}
+td:first-child{font-family:var(--display);font-weight:700;white-space:nowrap}
+
+/* trap */
+.trap{background:var(--sun-soft);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.trap h3{font-size:18px}
+.wrong{text-decoration:line-through;color:var(--bad);font-weight:700}
+.right{color:var(--ok);font-weight:800}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.q p{font-size:17px;font-weight:600}
+.q .num{font-family:var(--display);font-size:13px;color:var(--muted)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts button{font:inherit;font-weight:800;font-size:16px;padding:9px 16px;border-radius:999px;border:2px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer;transition:transform .12s, background .12s, border-color .12s}
+.opts button:hover{border-color:var(--res)}
+.opts button:focus-visible{outline:3px solid var(--res);outline-offset:2px}
+.opts button.correct{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.opts button.wrongpick{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.opts button:disabled{cursor:default}
+.fb{font-size:15px;color:var(--muted)}
+.fb b{color:var(--fg)}
+.score{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:var(--res);color:#fff;border-radius:18px;padding:16px 20px;font-family:var(--display);font-weight:700}
+.score button{font:inherit;font-size:14px;background:#fff;color:var(--res);border:none;border-radius:999px;padding:8px 16px;cursor:pointer}
+.score button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+footer{color:var(--muted);font-size:14px;text-align:center}
+@media (prefers-reduced-motion: reduce){.opts button{transition:none}}
+.pop{animation:pop .25s ease}
+@keyframes pop{50%{transform:scale(1.06)}}
+@media (prefers-reduced-motion: reduce){.pop{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><span class="eyebrow">English with Sis · грамматика ОГЭ</span><a href="index.html" style="color:var(--res);font-weight:800;text-decoration:none">← На главную</a></div>
+    <h1>Passive Voice: <span class="res">be</span> + 3-я форма</h1>
+    <p class="lead">Пассив (страдательный залог) нужен, когда важно не <b>кто</b> делает, а <b>что происходит</b> с предметом. В ОГЭ он попадается в заданиях 20–28 почти в каждом варианте.</p>
+    <div class="switch" aria-label="Active: People speak English. Passive: English is spoken.">
+      <span class="a"><small>актив: кто делает</small>People speak English.</span>
+      <span class="b"><small>пассив: что с предметом</small>English is spoken.</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Одна формула на все времена</h2>
+    <div class="rule">
+      <div class="formula"><span class="chip if">be в нужном времени</span><span class="plus">+</span><span class="chip res">3-я форма глагола</span></div>
+      <p class="when">Меняется только <b>be</b>: is / are, was / were, will be, has been. Главный глагол всегда в 3-й форме: правильные на <b>-ed</b> (painted), неправильные — из третьей колонки таблицы (built, written).</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="tag">Present Simple Passive</span>
+    <h2>Обычно, всегда, вообще</h2>
+    <div class="rule">
+      <div class="formula"><span class="chip if">am / is / are</span><span class="plus">+</span><span class="chip res">3-я форма</span></div>
+      <p class="when">Факты и то, что делают регулярно.</p>
+      <div class="ex"><p>English <span class="res">is spoken</span> all over the world.</p><p class="ru">На английском говорят во всём мире.</p></div><div class="ex"><p>These cars <span class="res">are made</span> in Japan.</p><p class="ru">Эти машины производят в Японии.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="tag">Past Simple Passive</span>
+    <h2>Было сделано в прошлом</h2>
+    <div class="rule">
+      <div class="formula"><span class="chip if">was / were</span><span class="plus">+</span><span class="chip res">3-я форма</span></div>
+      <p class="when">Самый частый пассив в ОГЭ: тексты об истории, о зданиях, изобретениях. Подсказки: даты, <b>ago</b>, <b>last</b>, <b>by</b>.</p>
+      <div class="ex"><p>The theatre <span class="res">was built</span> in 1825.</p><p class="ru">Театр был построен в 1825 году.</p></div><div class="ex"><p>The photos <span class="res">were taken</span> by my grandfather.</p><p class="ru">Эти фотографии сделал мой дедушка.</p></div>
+    </div>
+    <div class="trap"><h3>Ловушка: was или were?</h3><p>Смотри на подлежащее: один предмет → <b>was</b>, много → <b>were</b>.</p><p><span class="wrong">Two bones was broken</span> → <span class="right">Two bones were broken</span></p></div>
+  </section>
+
+  <section>
+    <span class="tag">Future Simple Passive</span>
+    <h2>Будет сделано</h2>
+    <div class="rule">
+      <div class="formula"><span class="chip if">will be</span><span class="plus">+</span><span class="chip res">3-я форма</span></div>
+      <p class="when">Подсказки: <b>tomorrow</b>, <b>next</b>, <b>soon</b>.</p>
+      <div class="ex"><p>The results <span class="res">will be announced</span> tomorrow.</p><p class="ru">Результаты объявят завтра.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="tag">Present Perfect Passive</span>
+    <h2>Уже сделано, результат сейчас</h2>
+    <div class="rule">
+      <div class="formula"><span class="chip if">has / have been</span><span class="plus">+</span><span class="chip res">3-я форма</span></div>
+      <p class="when">Подсказки те же, что у Present Perfect: <b>already</b>, <b>just</b>, <b>yet</b>.</p>
+      <div class="ex"><p>My bike <span class="res">has been stolen</span>!</p><p class="ru">У меня украли велосипед!</p></div>
+    </div>
+    <div class="trap"><h3>Как узнать пассив в задании ОГЭ</h3><p>Спроси себя: предмет может сделать это сам? Здание не строит само себя, письмо не пишет само себя → нужен пассив.</p><p>Видишь <b>by</b> + человек после пропуска → почти точно пассив: <i>It ____ (DESIGN) by Andrei Mikhailov</i> → <span class="right">was designed</span>.</p></div>
+  </section>
+
+  <section>
+    <h2>Всё в одной таблице</h2>
+    <div class="tbl"><table><thead><tr><th>Время</th><th>Формула</th><th>Пример</th></tr></thead><tbody><tr><td>Present Simple</td><td>am / is / are + V3</td><td>English is spoken</td></tr><tr><td>Past Simple</td><td>was / were + V3</td><td>It was built</td></tr><tr><td>Future Simple</td><td>will be + V3</td><td>It will be built</td></tr><tr><td>Present Perfect</td><td>has / have been + V3</td><td>It has been built</td></tr></tbody></table></div>
+  </section>
+
+  <section aria-labelledby="quiz-h">
+    <h2 id="quiz-h">Проверь себя</h2>
+    <p class="lead">Выбери правильную форму. Сразу увидишь, верно или нет, и почему.</p>
+    <div id="quiz" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="score" aria-live="polite"><span id="score">0 из 8</span><button type="button" id="reset">Пройти заново</button></div>
+  </section>
+
+  <footer>Сделано для наших занятий · удачи на ОГЭ!</footer>
+</div>
+
+<script>
+const QUIZ=[
+{
+"q": "English ____ in many countries.",
+"o": [
+"speaks",
+"is spoken",
+"spoke"
+],
+"a": 1,
+"why": "Язык не говорит сам, на нём говорят → пассив; общий факт → is + V3."
+},
+{
+"q": "This castle ____ in the 15th century.",
+"o": [
+"built",
+"is built",
+"was built"
+],
+"a": 2,
+"why": "Замок построили (не сам), в прошлом → was + V3."
+},
+{
+"q": "A new school ____ in our town next year.",
+"o": [
+"will build",
+"will be built",
+"was built"
+],
+"a": 1,
+"why": "next year → будущее; школу построят → will be + V3."
+},
+{
+"q": "These photos ____ by my grandfather.",
+"o": [
+"took",
+"was taken",
+"were taken"
+],
+"a": 2,
+"why": "by + человек → пассив; photos — много → were."
+},
+{
+"q": "Paper ____ from wood.",
+"o": [
+"makes",
+"is made",
+"made"
+],
+"a": 1,
+"why": "Бумагу делают из дерева — общий факт → is made."
+},
+{
+"q": "The window ____ yesterday.",
+"o": [
+"was broken",
+"were broken",
+"is broken"
+],
+"a": 0,
+"why": "yesterday → прошлое; window — одно → was broken."
+},
+{
+"q": "Oh no! My bike ____!",
+"o": [
+"has stolen",
+"has been stolen",
+"is stealing"
+],
+"a": 1,
+"why": "Велосипед не крадёт сам; результат сейчас → has been + V3."
+},
+{
+"q": "The letter ____ by Tom last week.",
+"o": [
+"wrote",
+"is written",
+"was written"
+],
+"a": 2,
+"why": "by Tom, last week → пассив в прошлом: was + V3 (write — wrote — written)."
+}
+];
+const box=document.getElementById('quiz'), scoreEl=document.getElementById('score');
+let answered=0, right=0;
+function render(){
+  box.innerHTML=''; answered=0; right=0; scoreEl.textContent='0 из '+QUIZ.length;
+  QUIZ.forEach((item,i)=>{
+    const card=document.createElement('div'); card.className='q';
+    const [before,after]=item.q.split('____');
+    card.innerHTML='<span class="num">'+(i+1)+' / '+QUIZ.length+'</span><p></p><div class="opts" role="group"></div><p class="fb" hidden></p>';
+    const p=card.querySelector('p');
+    p.append(before); const gap=document.createElement('b'); gap.textContent='______'; p.append(gap, after);
+    const opts=card.querySelector('.opts'), fb=card.querySelector('.fb');
+    opts.setAttribute('aria-label','Варианты к вопросу '+(i+1));
+    item.o.forEach((txt,j)=>{
+      const b=document.createElement('button'); b.type='button'; b.id='q'+i+'o'+j; b.textContent=txt;
+      b.addEventListener('click',()=>{
+        const ok=j===item.a;
+        [...opts.children].forEach((x,k)=>{x.disabled=true; if(k===item.a) x.classList.add('correct');});
+        if(!ok) b.classList.add('wrongpick');
+        b.classList.add('pop');
+        gap.textContent=item.o[item.a]; gap.className=ok?'right':'res';
+        fb.hidden=false; fb.innerHTML='<b>'+(ok?'Верно! ':'Не совсем. ')+'</b>'; fb.append(item.why);
+        answered++; if(ok) right++;
+        scoreEl.textContent=right+' из '+QUIZ.length+(answered===QUIZ.length?(right===QUIZ.length?' — идеально!':right>=6?' — отлично!':' — разбери ошибки и попробуй ещё'):'');
+      });
+      opts.append(b);
+    });
+    box.append(card);
+  });
+}
+document.getElementById('reset').addEventListener('click',render);
+render();
+</script>
+</body>
+</html>

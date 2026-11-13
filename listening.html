@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тренажёр: Listening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: list of trainings → one training view (instructions, player, questions, result). */
+:root{
+  --bg:#FBF7F1; --surface:#FFFFFF; --fg:#22193A; --muted:#625A74; --line:#E7E0EC;
+  --pink:#E2457E; --pink-soft:#FCE6EE; --blue:#3A57E8; --blue-soft:#E6EBFD;
+  --sun:#F2C232; --sun-soft:#FDF3D2; --ok:#16936A; --ok-soft:#DDF4EB; --bad:#C8384A; --bad-soft:#FBE3E6;
+  --display:"Unbounded","Arial Black",Arial,sans-serif; --body:"Nunito","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(26px,6vw,40px)} h2{font-size:clamp(20px,4.5vw,26px)} h3{font-size:18px}
+p{margin:0}
+a{color:var(--blue)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.top a{color:var(--muted);font-weight:700;text-decoration:none;font-size:15px}
+.lead{color:var(--muted)}
+.hint{color:var(--muted);font-size:15px}
+.name{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:700}
+input[type=text]{font:inherit;font-weight:700;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--fg);min-width:0}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.tcard{display:flex;flex-direction:column;gap:8px;padding:18px;border-radius:20px;background:var(--surface);border:2px solid var(--line);text-decoration:none;color:var(--fg)}
+.tcard:hover{border-color:var(--fg)}
+.tcard .done{font-weight:800;color:var(--ok);font-size:14px}
+.tag{align-self:flex-start;font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:8px}
+.tag.class{background:var(--blue-soft);color:var(--blue)} .tag.hw{background:var(--pink-soft);color:var(--pink)} .tag.bonus{background:var(--sun-soft);color:var(--fg)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.instr{background:var(--sun-soft);border-radius:16px;padding:14px 16px;font-size:16px}
+.player{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:inherit;font-weight:800;border-radius:999px;cursor:pointer;border:2px solid var(--line);background:var(--surface);color:var(--fg);padding:11px 20px}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.pink{background:var(--pink);border-color:var(--pink);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.status{font-weight:700;color:var(--muted)}
+.status b{color:var(--pink)}
+.listens{display:flex;gap:6px}
+.listens i{width:14px;height:14px;border-radius:50%;background:var(--line);display:inline-block}
+.listens i.on{background:var(--pink)}
+label.chk{display:flex;gap:8px;align-items:center;font-size:15px;color:var(--muted);font-weight:700}
+.q{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:16px;border:2px solid var(--line)}
+.q .n{font-family:var(--display);font-weight:700;color:var(--pink)}
+.q label.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:12px;cursor:pointer}
+.q label.opt:hover{background:var(--blue-soft)}
+.q.ok{border-color:var(--ok);background:var(--ok-soft)}
+.q.no{border-color:var(--bad);background:var(--bad-soft)}
+.fix{font-weight:800;font-size:15px}
+.q.ok .fix{color:var(--ok)} .q.no .fix{color:var(--bad)}
+.stm{display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-radius:14px;background:var(--blue-soft);font-size:16px}
+.match{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media (max-width:520px){.match{grid-template-columns:repeat(3,1fr)}}
+.match .q{align-items:center;padding:10px}
+select{font:inherit;font-weight:800;font-size:18px;padding:6px 10px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--fg)}
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+td.ans{width:38%}
+td input{min-width:100px}
+td,th{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:middle}
+th{font-family:var(--display);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.num{font-family:var(--display);font-weight:700;color:var(--pink);width:44px}
+td input{width:100%}
+tr.ok td{background:var(--ok-soft)} tr.no td{background:var(--bad-soft)}
+.result{background:var(--blue);color:#fff;border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:8px}
+.result .big{font-family:var(--display);font-size:44px;font-weight:800;line-height:1}
+.result p{color:#fff}
+details{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+summary{cursor:pointer;font-weight:800}
+.script p{margin-top:8px;font-size:16px}
+.script b{color:var(--blue)}
+.warn{background:var(--bad-soft);color:var(--bad);border-radius:14px;padding:12px 16px;font-weight:700}
+footer{color:var(--muted);font-size:14px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ---------- Content ---------- */
+const I14 = "Вы услышите четыре коротких текста, обозначенных 1, 2, 3 и 4. В заданиях 1–4 выберите вариант ответа 1, 2 или 3, который соответствует содержанию текста. Запись прозвучит дважды.";
+const I5 = "Вы услышите пять высказываний, обозначенных A, B, C, D и E. Установите соответствие между высказываниями каждого говорящего и утверждениями 1–6. Каждое утверждение используется только один раз. Одно утверждение лишнее. Запись прозвучит дважды.";
+const I611 = "Вы услышите интервью. В заданиях 6–11 заполните пропуски в таблице словами из записи. Пишите только одно слово, без артиклей. Числа пишите словами. Запись прозвучит дважды.";
+
+const TRAININGS = [
+{ id:"t1", type:"mc", title:"Задания 1–4", variant:1, tag:"class", instr:I14,
+  texts:[
+   {label:"Text 1", lines:[["A","Attention, please. This is an announcement for passengers on the train to Brighton. Because of the heavy rain, the train will leave from platform six, not platform two. The departure time is the same, ten fifteen. We are sorry for any inconvenience."]]},
+   {label:"Text 2", lines:[["F","Hi Kate, it's Anna. About Saturday. I can't go to the cinema in the afternoon, because I have a piano lesson. But I'm free in the evening. Maybe we can go to the seven o'clock film instead of the four o'clock one? Or we could go skating on Sunday. Call me back!"]]},
+   {label:"Text 3", lines:[["F","Excuse me, I'd like to return these jeans."],["M","What's wrong with them? Are they too small?"],["F","No, the size is fine, and I like the colour. But look, there's a hole here, near the pocket."],["M","Oh, I see. Would you like your money back or another pair?"],["F","Another pair, please."]]},
+   {label:"Text 4", lines:[["M","Are you going to Lucy's birthday party on Friday?"],["F","I'd love to, but I haven't got a present yet. I thought about a book, but she reads so much, she probably has everything."],["M","What about a T-shirt with her favourite band on it?"],["F","Great idea! She'll like it more than flowers."]]}
+  ],
+  qs:[
+   {q:"What has changed?", o:["the departure time","the platform","the destination"], a:1},
+   {q:"Why is Anna calling Kate?", o:["to cancel their meeting","to suggest a different time","to invite Kate to a piano concert"], a:1},
+   {q:"Why does the woman return the jeans?", o:["They are the wrong size.","She doesn't like the colour.","They are damaged."], a:2},
+   {q:"What present is the girl going to buy?", o:["a book","a T-shirt","flowers"], a:1}
+  ]},
+{ id:"t2", type:"table", title:"Задания 6–11", variant:1, tag:"class", instr:I611,
+  lines:[
+   ["M","Hello and welcome to Teen Talk. Today our guest is Lily Evans. Lily is fifteen, and she helps at an animal shelter in our town. Hi, Lily!"],
+   ["F","Hi! Thanks for inviting me."],
+   ["M","When did you start volunteering?"],
+   ["F","Two years ago, when I was thirteen. My friend's mum works at the shelter, and one day she took us there. I fell in love with the place at once."],
+   ["M","How often do you go there?"],
+   ["F","During the school year I'm very busy, so I can only go on Saturday. In the summer holidays I went almost every day."],
+   ["M","What animals live at the shelter?"],
+   ["F","Everybody thinks we have mostly dogs, but actually most of our animals are cats. Right now we have about forty cats and fifteen dogs. We also have two rabbits!"],
+   ["M","What do you do there?"],
+   ["F","Lots of things. I clean the cages and give the animals food and water. But the best part is walking the dogs. We go to the park near the shelter, and the dogs are so happy. I love it more than anything else."],
+   ["M","Does the shelter need help?"],
+   ["F","Yes. People often think the shelter needs money. Of course money is important, but what we really need is more volunteers. There's too much work for our small team."],
+   ["M","And what about your future? Do you want to work with animals?"],
+   ["F","Definitely. My parents think I should become a teacher like my mum, but I've decided to be a vet. I want to help animals every day."],
+   ["M","Thank you, Lily, and good luck!"]
+  ],
+  head:"Lily Evans, a volunteer at an animal shelter",
+  rows:[
+   {n:6, l:"Lily started volunteering at the age of", a:["thirteen"]},
+   {n:7, l:"In the school year she goes to the shelter on", a:["saturday","saturdays"]},
+   {n:8, l:"Most animals at the shelter are", a:["cats"]},
+   {n:9, l:"Her favourite activity is ___ the dogs", a:["walking"]},
+   {n:10, l:"The shelter really needs more", a:["volunteers"]},
+   {n:11, l:"Lily wants to become a", a:["vet"]}
+  ]},
+{ id:"t3", type:"mc", title:"Задания 1–4", variant:2, tag:"hw", instr:I14,
+  texts:[
+   {label:"Text 1", lines:[["A","Good afternoon, visitors. The museum will close in thirty minutes. The café on the ground floor is already closed, but the gift shop is open until six o'clock. Please remember that the museum is closed on Monday because of repairs. We'll be happy to see you again on Tuesday."]]},
+   {label:"Text 2", lines:[["M","Hi Max, it's Dad. I'm still at work, and I'll be home late, at about eight. Mum is visiting Grandma today. There's some soup in the fridge, so please heat it up for dinner. Don't order pizza again! And don't forget to walk the dog. See you later."]]},
+   {label:"Text 3", lines:[["F","Hi Ben, you weren't at football training yesterday. Were you ill?"],["M","No, I'm fine. My bike broke on the way, so I had to walk home."],["F","Oh no! Is it OK now?"],["M","Yes, my brother fixed it in the evening."]]},
+   {label:"Text 4", lines:[["M","Shall we go to the beach on Saturday?"],["F","The forecast says it'll be cold and windy on Saturday."],["M","Then what about the museum?"],["F","We went there last week. Let's go to the new ice rink in the shopping centre."],["M","OK, good idea."]]}
+  ],
+  qs:[
+   {q:"Which place is already closed?", o:["the café","the gift shop","the museum"], a:0},
+   {q:"What should Max do?", o:["order a pizza","visit Grandma","walk the dog"], a:2},
+   {q:"Why did Ben miss the training?", o:["He was ill.","His bike broke.","He had to help his brother."], a:1},
+   {q:"Where will they go on Saturday?", o:["to the beach","to the museum","to the ice rink"], a:2}
+  ]},
+{ id:"t4", type:"match", title:"Задание 5", variant:1, tag:"hw", instr:I5,
+  topic:"Learning foreign languages",
+  speakers:[
+   ["F","Every morning on the bus I open an app on my phone and do a short lesson. It shows me ten new words, and then it tests me. It's like a game, so I never miss a day. My vocabulary has really grown this year."],
+   ["M","I want to be an engineer and work for an international company. My dad says that today you can't get a good job without English. So I study hard, even grammar, because I know it'll be useful later."],
+   ["F","When I was nine, my family moved to Spain for two years. I went to a local school, and at first I didn't understand anything. But children learn quickly, and after a few months I was chatting with my classmates in Spanish."],
+   ["M","Honestly, I didn't like English at school until we got a new teacher. She was so funny and kind, and her lessons were never boring. She played songs and games with us, and now English is my favourite subject."],
+   ["F","I love Korean dramas and K-pop, and I got tired of reading subtitles. So I started learning Korean on my own. Now I can understand some songs without a translation, and it's an amazing feeling."]
+  ],
+  stm:["I learn a language to understand films and songs.","Learning a language will help me in my future job.","I learnt a language when I lived abroad.","Grammar is the most difficult part for me.","I learn new words with the help of an app.","A teacher made me love the language."],
+  ans:[5,2,3,6,1]},
+{ id:"t5", type:"table", title:"Задания 6–11", variant:2, tag:"hw", instr:I611,
+  lines:[
+   ["F","Today on Teen Talk we have Max Brown. Max is sixteen, and he has a cooking blog. Welcome, Max!"],
+   ["M","Hello! It's great to be here."],
+   ["F","When did you start cooking?"],
+   ["M","I made my first pancakes when I was ten. They were terrible, but I didn't give up. I started my blog much later, at fourteen."],
+   ["F","Who taught you to cook?"],
+   ["M","Everyone thinks it was my mum, but she doesn't really like cooking. It was my grandmother. I spent every summer at her house, and we cooked together every day."],
+   ["F","How often do you post new recipes?"],
+   ["M","At first I posted on Sundays, but at the weekend I'm busy with football. So now I post a new recipe every Friday."],
+   ["F","What is your most popular recipe?"],
+   ["M","People love my chocolate cake, but the most popular one is my pumpkin soup. It's easy, cheap and very healthy."],
+   ["F","How many people follow your blog?"],
+   ["M","When I started, I had only twelve followers, and they were all my friends! Now I have about twenty thousand followers."],
+   ["F","What are your plans for the future?"],
+   ["M","I don't want to work in a big restaurant. My dream is to open my own café. Small, cosy, with home food."],
+   ["F","Thank you, Max, and good luck!"]
+  ],
+  head:"Max Brown, a teenage food blogger",
+  rows:[
+   {n:6, l:"Max cooked his first pancakes at the age of", a:["ten"]},
+   {n:7, l:"He learnt to cook from his", a:["grandmother","grandma","granny"]},
+   {n:8, l:"He posts a new recipe every", a:["friday"]},
+   {n:9, l:"His most popular recipe is pumpkin", a:["soup"]},
+   {n:10, l:"Number of followers: about ___ thousand", a:["twenty"]},
+   {n:11, l:"His dream is to open his own", a:["café","cafe"]}
+  ]},
+{ id:"t6", type:"match", title:"Задание 5", variant:2, tag:"bonus", instr:I5,
+  topic:"Holidays",
+  speakers:[
+   ["M","Last summer we planned to go camping by the lake. But on the first day it started raining, and it didn't stop for a week. Our tent got wet, and we went home after three days. Next time we'll check the weather forecast!"],
+   ["F","For me the best part of any trip is the local cafés. In Italy I ate real pizza, and in Georgia I tried khachapuri for the first time. I always take photos of my food, and I try to cook it when I come back."],
+   ["M","I worked in my uncle's shop every weekend for six months. I didn't buy new clothes or games. I put every coin in a box. In the end I had enough to go to St Petersburg with my friend."],
+   ["F","Lying on the beach all day is so boring! I like hiking in the mountains, cycling and swimming in the sea. When I come home after a holiday, I'm tired but happy."],
+   ["M","Many of my friends go abroad, but I love my holidays at home. I sleep late, read books, see my friends and play computer games. I don't need to pack a suitcase or sit in a plane for hours."]
+  ],
+  stm:["I prefer active holidays.","I like travelling with my family.","My holiday didn't go as planned.","I'd rather stay at home during the holidays.","I love trying food in other countries.","I saved money for my trip."],
+  ans:[3,5,6,1,4]}
+];
+const TAGS = {class:"На занятии", hw:"Домашка", bonus:"Дополнительно"};
+const NUMW = ["one","two","three","four"];
+
+/* ---------- Storage (per-viewer, optional) ---------- */
+function store(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k, JSON.stringify(v)); } catch(e){ return null; } }
+
+/* ---------- Speech ---------- */
+const TTS = "speechSynthesis" in window;
+let VO = {F:null, M:null, A:null, fallback:true};
+function pickVoices(){
+  if (!TTS) return;
+  const all = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
+  if (!all.length) return;
+  const fem = /female|samantha|karen|victoria|zira|susan|serena|moira|tessa|fiona|kate|hazel|libby|sonia|aria|jenny|emma|amy|joanna|salli|kimberly|martha|catherine|allison|ava|nicky/i;
+  const mal = /\bmale|daniel|alex\b|david|mark|george|ryan|guy|fred|arthur|oliver|thomas|rishi|brian|matthew|joey|aaron|gordon|reed/i;
+  const pref = a => a.sort((x, y) => (/GB|UK/i.test(y.lang + y.name) - /GB|UK/i.test(x.lang + x.name)));
+  const f = pref(all.filter(v => fem.test(v.name) && !/\bmale/i.test(v.name.replace(/female/i, ""))));
+  const m = pref(all.filter(v => mal.test(v.name.replace(/female/i, "")) && !fem.test(v.name)));
+  VO.F = f[0] || all[0];
+  VO.M = m[0] || all.find(v => v !== VO.F) || all[0];
+  VO.A = pref(all.slice())[0];
+  VO.fallback = !(f[0] && m[0]);
+}
+if (TTS){ pickVoices(); speechSynthesis.onvoiceschanged = pickVoices; }
+let stopFlag = false;
+function sentences(t){ return t.match(/[^.!?]+[.!?]+["']?|[^.!?]+$/g) || [t]; }
+function sayOne(text, role){
+  return new Promise(res => {
+    const u = new SpeechSynthesisUtterance(text.trim());
+    const v = VO[role] || VO.A;
+    if (v){ u.voice = v; u.lang = v.lang; } else u.lang = "en-GB";
+    u.rate = 0.9;
+    u.pitch = VO.fallback ? (role === "M" ? 0.7 : role === "F" ? 1.3 : 1) : 1;
+    u.onend = res; u.onerror = res;
+    speechSynthesis.speak(u);
+  });
+}
+async function say(text, role){ for (const s of sentences(text)){ if (stopFlag) return; await sayOne(s, role); } }
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+function segments(t){
+  if (t.type === "mc") return t.texts.map((x, i) => ({label:x.label, intro:"Text " + NUMW[i] + ".", lines:x.lines}));
+  if (t.type === "match") return t.speakers.map((s, i) => ({label:"Speaker " + "ABCDE"[i], intro:"Speaker " + "ABCDE"[i] + ".", lines:[s]}));
+  return [{label:"Interview", intro:"", lines:t.lines}];
+}
+
+/* ---------- Rendering ---------- */
+const app = document.getElementById("app");
+const put = (...k) => app.append(...k.filter(x => x != null));
+function h(tag, attrs, ...kids){ const e = document.createElement(tag); if (attrs) for (const [k, v] of Object.entries(attrs)){ if (k === "class") e.className = v; else if (k in e) e[k] = v; else e.setAttribute(k, v); } kids.flat().forEach(k => k != null && e.append(k)); return e; }
+
+function renderList(){
+  if (TTS) speechSynthesis.cancel();
+  app.innerHTML = "";
+  const results = store("ews-listen-results") || {};
+  const nameIn = h("input", {type:"text", id:"student-name", placeholder:"Твоё имя", value:store("ews-name") || ""});
+  nameIn.addEventListener("input", () => store("ews-name", nameIn.value.trim()));
+  const list = h("div", {class:"list"});
+  TRAININGS.forEach((t, i) => {
+    const r = results[t.id];
+    list.append(h("a", {class:"tcard", href:"#" + t.id},
+      h("span", {class:"tag " + t.tag}, TAGS[t.tag]),
+      h("h3", null, "Тренировка " + (i + 1)),
+      h("p", {class:"hint"}, t.title + " · вариант " + t.variant),
+      r ? h("span", {class:"done"}, "Лучший результат: " + r.best + " / " + r.max) : null));
+  });
+  put(
+    h("div", {class:"top"}, h("a", {href:"index.html"}, "← На главную"), h("span", {class:"hint"}, "Задания 1–11 · 15 баллов")),
+    h("header", {style:"display:flex;flex-direction:column;gap:8px"}, h("h1", null, "Listening: тренажёр"),
+      h("p", {class:"lead"}, "Аудирование в формате ОГЭ: слушаешь запись два раза и сразу отвечаешь. Тексты читает голос браузера, поэтому включи звук.")),
+    h("div", {class:"name"}, h("label", {for:"student-name"}, "Имя для результата:"), nameIn),
+    !TTS ? h("p", {class:"warn"}, "Этот браузер не умеет озвучивать текст. Открой страницу в Chrome или Safari.") : null,
+    list,
+    h("footer", null, "Тексты составлены в формате заданий ФИПИ · English with Sis"));
+}
+
+function renderTraining(t){
+  if (TTS) speechSynthesis.cancel();
+  stopFlag = false;
+  app.innerHTML = "";
+  const idx = TRAININGS.indexOf(t);
+  let listens = 0;
+  const examChk = h("input", {type:"checkbox", id:"exam-mode", checked:true});
+  const dots = h("span", {class:"listens", "aria-hidden":"true"}, h("i"), h("i"));
+  const status = h("span", {class:"status", role:"status"}, "Нажми «Слушать», когда прочитаешь задания.");
+  const playBtn = h("button", {type:"button", class:"btn primary", id:"play"}, "▶ Слушать");
+  const stopBtn = h("button", {type:"button", class:"btn", id:"stop", disabled:true}, "■ Стоп");
+  function paintDots(){ [...dots.children].forEach((d, i) => d.classList.toggle("on", i < listens)); }
+  async function play(){
+    if (!TTS) return;
+    if (examChk.checked && listens >= 2) return;
+    listens++; paintDots();
+    playBtn.disabled = true; stopBtn.disabled = false; stopFlag = false;
+    speechSynthesis.cancel(); pickVoices();
+    const segs = segments(t);
+    for (const s of segs){
+      if (stopFlag) break;
+      status.innerHTML = ""; status.append("Звучит: ", h("b", null, s.label), " · прослушивание " + listens + " из 2");
+      if (s.intro){ await say(s.intro, "A"); await wait(600); }
+      for (const [role, text] of s.lines){ if (stopFlag) break; await say(text, role); await wait(350); }
+      await wait(1500);
+    }
+    stopBtn.disabled = true;
+    const left = examChk.checked ? 2 - listens : null;
+    status.textContent = stopFlag ? "Остановлено." : (left === 0 ? "Запись прозвучала дважды. Проверь ответы и нажми «Проверить»." : "Запись закончилась. Можно послушать ещё раз.");
+    playBtn.disabled = examChk.checked && listens >= 2;
+    playBtn.textContent = "▶ Слушать ещё раз";
+  }
+  playBtn.onclick = play;
+  stopBtn.onclick = () => { stopFlag = true; if (TTS) speechSynthesis.cancel(); };
+  examChk.onchange = () => { playBtn.disabled = examChk.checked && listens >= 2; };
+
+  const form = h("div", {class:"box"});
+  let check;
+  if (t.type === "mc"){
+    t.qs.forEach((q, i) => {
+      const box = h("div", {class:"q"}, h("span", {class:"n"}, String(i + 1)), h("p", null, h("b", null, q.q)));
+      q.o.forEach((o, j) => {
+        const id = t.id + "q" + i + "o" + j;
+        box.append(h("label", {class:"opt", for:id}, h("input", {type:"radio", name:t.id + "q" + i, id, value:String(j)}), h("span", null, (j + 1) + ") " + o)));
+      });
+      box.append(h("span", {class:"fix", hidden:true}));
+      form.append(box);
+    });
+    check = () => t.qs.map((q, i) => {
+      const box = form.children[i]; const sel = form.querySelector("input[name='" + t.id + "q" + i + "']:checked");
+      const ok = sel && +sel.value === q.a;
+      box.className = "q " + (ok ? "ok" : "no");
+      const f = box.querySelector(".fix"); f.hidden = false; f.textContent = ok ? "Верно" : "Правильный ответ: " + (q.a + 1) + ") " + q.o[q.a];
+      return ok;
+    });
+  } else if (t.type === "match"){
+    const st = h("div", {class:"stm"}, h("b", null, "Тема: " + t.topic));
+    t.stm.forEach((s, i) => st.append(h("span", null, (i + 1) + ". " + s)));
+    const grid = h("div", {class:"match"});
+    "ABCDE".split("").forEach((L, i) => {
+      const sel = h("select", {id:t.id + "s" + i, "aria-label":"Говорящий " + L}, h("option", {value:""}, "–"), [1,2,3,4,5,6].map(n => h("option", {value:String(n)}, String(n))));
+      grid.append(h("div", {class:"q"}, h("span", {class:"n"}, L), sel, h("span", {class:"fix", hidden:true})));
+    });
+    form.append(st, h("p", {class:"hint"}, "Выбери номер утверждения для каждого говорящего:"), grid);
+    check = () => t.ans.map((a, i) => {
+      const cell = grid.children[i]; const v = +cell.querySelector("select").value; const ok = v === a;
+      cell.className = "q " + (ok ? "ok" : "no");
+      const f = cell.querySelector(".fix"); f.hidden = false; f.textContent = ok ? "✓" : "→ " + a;
+      return ok;
+    });
+  } else {
+    const tb = h("tbody");
+    t.rows.forEach(r => tb.append(h("tr", null, h("td", {class:"num"}, String(r.n)), h("td", null, r.l), h("td", {class:"ans"}, h("input", {type:"text", id:t.id + "r" + r.n, autocomplete:"off", autocapitalize:"off", spellcheck:false, "aria-label":"Ответ " + r.n})))));
+    form.append(h("p", null, h("b", null, t.head)), h("div", {class:"tblwrap"}, h("table", null, h("thead", null, h("tr", null, h("th", null, "№"), h("th", null, "Facts"), h("th", null, "Answer"))), tb)));
+    check = () => t.rows.map((r, i) => {
+      const tr = tb.children[i]; const inp = tr.querySelector("input");
+      const v = inp.value.trim().toLowerCase().replace(/^(a|an|the)\s+/, "");
+      const ok = r.a.includes(v);
+      tr.className = ok ? "ok" : "no";
+      let f = tr.querySelector(".fix"); if (!f){ f = h("div", {class:"fix"}); tr.children[2].append(f); }
+      f.textContent = ok ? "Верно" : "Правильно: " + r.a[0];
+      return ok;
+    });
+  }
+
+  const checkBtn = h("button", {type:"button", class:"btn pink", id:"check"}, "Проверить");
+  const out = h("div");
+  checkBtn.onclick = () => {
+    stopFlag = true; if (TTS) speechSynthesis.cancel();
+    const res = check(); const score = res.filter(Boolean).length;
+    const all = store("ews-listen-results") || {};
+    const prev = all[t.id]; all[t.id] = {best:Math.max(score, prev ? prev.best : 0), max:res.length}; store("ews-listen-results", all);
+    const name = store("ews-name") || "";
+    const d = new Date();
+    out.innerHTML = "";
+    out.append(h("div", {class:"result"},
+      h("p", null, (name ? name + " · " : "") + "Тренировка " + (idx + 1) + " · " + t.title + " (вариант " + t.variant + ")"),
+      h("p", {class:"big"}, score + " / " + res.length),
+      h("p", null, score === res.length ? "Идеально!" : score >= res.length * 0.7 ? "Отлично!" : "Посмотри текст записи и найди, где ошибка."),
+      h("p", {style:"opacity:.85;font-size:14px"}, d.toLocaleDateString("ru-RU") + " " + d.toLocaleTimeString("ru-RU", {hour:"2-digit", minute:"2-digit"}) + " · прослушиваний: " + listens)));
+    const sc = h("div", {class:"script"});
+    segments(t).forEach(s => { sc.append(h("p", null, h("b", null, s.label))); s.lines.forEach(([role, text]) => sc.append(h("p", null, (t.type === "table" ? (role === "M" ? "— " : "— ") : "") + text))); });
+    out.append(h("details", null, h("summary", null, "Текст записи"), sc));
+    checkBtn.disabled = true;
+    out.scrollIntoView({behavior:"smooth", block:"start"});
+  };
+  const again = h("button", {type:"button", class:"btn", id:"again"}, "Начать заново");
+  again.onclick = () => renderTraining(t);
+
+  put(
+    h("div", {class:"top"}, h("a", {href:"#"}, "← Все тренировки"), h("span", {class:"tag " + t.tag}, TAGS[t.tag])),
+    h("h1", null, "Тренировка " + (idx + 1) + ": " + t.title),
+    h("p", {class:"instr"}, t.instr),
+    !TTS ? h("p", {class:"warn"}, "Этот браузер не умеет озвучивать текст. Открой страницу в Chrome или Safari.") : null,
+    h("div", {class:"box"},
+      h("div", {class:"player"}, playBtn, stopBtn, dots),
+      status,
+      h("label", {class:"chk", for:"exam-mode"}, examChk, "Как на экзамене: только 2 прослушивания")),
+    form,
+    h("div", {class:"player"}, checkBtn, again),
+    out);
+}
+
+function route(){
+  const id = location.hash.slice(1);
+  const t = TRAININGS.find(x => x.id === id);
+  t ? renderTraining(t) : renderList();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>
