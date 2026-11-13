@@ -265,6 +265,11 @@ function renderList(){
   const results = store("ews-listen-results") || {};
   const nameIn = h("input", {type:"text", id:"student-name", placeholder:"Твоё имя", value:store("ews-name") || ""});
   nameIn.addEventListener("input", () => store("ews-name", nameIn.value.trim()));
+  const resetBtn = h("button", {type:"button", class:"btn"}, "Сбросить результаты");
+  resetBtn.onclick = () => {
+    if (resetBtn.dataset.sure){ try { localStorage.removeItem("ews-listen-results"); } catch(e){} renderList(); return; }
+    resetBtn.dataset.sure = "1"; resetBtn.textContent = "Точно сбросить? Нажми ещё раз";
+  };
   const list = h("div", {class:"list"});
   TRAININGS.forEach((t, i) => {
     const r = results[t.id];
@@ -280,6 +285,7 @@ function renderList(){
       h("p", {class:"lead"}, "Аудирование в формате ОГЭ: слушаешь запись два раза и сразу отвечаешь. Включи звук и сначала прочитай задания.")),
     h("div", {class:"name"}, h("label", {for:"student-name"}, "Имя для результата:"), nameIn),
     list,
+    Object.keys(results).length ? h("div", {style:"display:flex;justify-content:flex-end"}, resetBtn) : null,
     h("footer", null, "Тексты составлены в формате заданий ФИПИ · English with Sis"));
 }
 
