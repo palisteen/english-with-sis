@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тренажёр: Reading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: list of trainings → one training view (instructions, player, questions, result). */
+:root{
+  --bg:#FBF7F1; --surface:#FFFFFF; --fg:#22193A; --muted:#625A74; --line:#E7E0EC;
+  --pink:#E2457E; --pink-soft:#FCE6EE; --blue:#3A57E8; --blue-soft:#E6EBFD;
+  --sun:#F2C232; --sun-soft:#FDF3D2; --ok:#16936A; --ok-soft:#DDF4EB; --bad:#C8384A; --bad-soft:#FBE3E6;
+  --display:"Unbounded","Arial Black",Arial,sans-serif; --body:"Nunito","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(26px,6vw,40px)} h2{font-size:clamp(20px,4.5vw,26px)} h3{font-size:18px}
+p{margin:0}
+a{color:var(--blue)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.top a{color:var(--muted);font-weight:700;text-decoration:none;font-size:15px}
+.lead{color:var(--muted)}
+.hint{color:var(--muted);font-size:15px}
+.name{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:700}
+input[type=text]{font:inherit;font-weight:700;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--fg);min-width:0}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.tcard{display:flex;flex-direction:column;gap:8px;padding:18px;border-radius:20px;background:var(--surface);border:2px solid var(--line);text-decoration:none;color:var(--fg)}
+.tcard:hover{border-color:var(--fg)}
+.tcard .done{font-weight:800;color:var(--ok);font-size:14px}
+.tag{align-self:flex-start;font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:8px}
+.tag.class{background:var(--blue-soft);color:var(--blue)} .tag.hw{background:var(--pink-soft);color:var(--pink)} .tag.bonus{background:var(--sun-soft);color:var(--fg)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.instr{background:var(--sun-soft);border-radius:16px;padding:14px 16px;font-size:16px}
+.player{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:inherit;font-weight:800;border-radius:999px;cursor:pointer;border:2px solid var(--line);background:var(--surface);color:var(--fg);padding:11px 20px}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.pink{background:var(--pink);border-color:var(--pink);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.status{font-weight:700;color:var(--muted)}
+.status b{color:var(--pink)}
+.listens{display:flex;gap:6px}
+.listens i{width:14px;height:14px;border-radius:50%;background:var(--line);display:inline-block}
+.listens i.on{background:var(--pink)}
+label.chk{display:flex;gap:8px;align-items:center;font-size:15px;color:var(--muted);font-weight:700}
+.q{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:16px;border:2px solid var(--line)}
+.q .n{font-family:var(--display);font-weight:700;color:var(--pink)}
+.q label.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:12px;cursor:pointer}
+.q label.opt:hover{background:var(--blue-soft)}
+.q.ok{border-color:var(--ok);background:var(--ok-soft)}
+.q.no{border-color:var(--bad);background:var(--bad-soft)}
+.fix{font-weight:800;font-size:15px}
+.q.ok .fix{color:var(--ok)} .q.no .fix{color:var(--bad)}
+.stm{display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-radius:14px;background:var(--blue-soft);font-size:16px}
+.match{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media (max-width:520px){.match{grid-template-columns:repeat(3,1fr)}}
+.match .q{align-items:center;padding:10px}
+select{font:inherit;font-weight:800;font-size:18px;padding:6px 10px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--fg)}
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+td.ans{width:38%}
+td input{min-width:100px}
+td,th{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:middle}
+th{font-family:var(--display);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.num{font-family:var(--display);font-weight:700;color:var(--pink);width:44px}
+td input{width:100%}
+tr.ok td{background:var(--ok-soft)} tr.no td{background:var(--bad-soft)}
+.result{background:var(--blue);color:#fff;border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:8px}
+.result .big{font-family:var(--display);font-size:44px;font-weight:800;line-height:1}
+.result p{color:#fff}
+details{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+summary{cursor:pointer;font-weight:800}
+.script p{margin-top:8px;font-size:16px}
+.script b{color:var(--blue)}
+.warn{background:var(--bad-soft);color:var(--bad);border-radius:14px;padding:12px 16px;font-weight:700}
+footer{color:var(--muted);font-size:14px;text-align:center}
+.match{grid-template-columns:repeat(6,1fr)}
+@media (max-width:520px){.match{grid-template-columns:repeat(3,1fr)}}
+.qlist{margin:0;padding-left:24px;display:flex;flex-direction:column;gap:6px;font-weight:700}
+.rtext{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:var(--blue-soft)}
+.rtext .let{font-family:var(--display);font-size:22px;color:var(--blue);min-width:22px}
+.para{font-size:17px;line-height:1.6}
+.tf{display:flex;flex-wrap:wrap;gap:4px}
+.q .fix:empty{display:none}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ---------- Content: trainings in FIPI format (task 12 and tasks 13–19) ---------- */
+const I12 = "Вы проводите информационный поиск в ходе выполнения проектной работы. Определите, в каком из текстов A–F содержатся ответы на вопросы 1–7. Один из вопросов останется без ответа. Под каждой буквой текста выбери номер вопроса.";
+const I1319 = "Прочитайте текст. Определите, какие из утверждений 13–19 соответствуют содержанию текста (1 — True), какие не соответствуют (2 — False) и о чём в тексте не сказано, то есть на основании текста нельзя дать ни положительного, ни отрицательного ответа (3 — Not stated).";
+
+const TRAININGS = [
+{ id:"r1", tag:"class", type:"match", title:"Задание 12", variant:1, topic:"Sleep",
+  questions:[
+    "Why do teenagers want to go to bed late?",
+    "How much sleep do teenagers need?",
+    "What happens to the brain during sleep?",
+    "How can phones affect sleep?",
+    "Can a short sleep during the day be useful?",
+    "What should you eat before going to bed?",
+    "Which animals sleep the most?"],
+  texts:[
+    "Doctors say that people of different ages need different amounts of sleep. Babies sleep up to seventeen hours a day. Adults usually feel fine after seven or eight hours. Teenagers, however, need more than adults: experts recommend from eight to ten hours every night. Unfortunately, most teenagers get much less, especially during exams.",
+    "Many parents think their teenage children stay up late because they are lazy or love computer games. In fact, the reason is biological. During the teenage years the body starts producing melatonin, the “sleep hormone”, about two hours later than in childhood. That is why a fifteen-year-old simply does not feel sleepy at ten o’clock in the evening.",
+    "Screens give out blue light, which tells the brain that it is still daytime. If you chat with friends or watch videos in bed, your body produces less melatonin and you fall asleep later. Scientists advise putting your phone away at least an hour before going to bed or switching on the night mode.",
+    "Sleep is not just rest. While we are sleeping, the brain is very busy. It sorts out everything we learned during the day and moves important information into long-term memory. That is why students who sleep well before a test usually remember more than those who study all night.",
+    "Some animals are real champions of sleep. Koalas sleep about twenty hours a day because their food, eucalyptus leaves, gives them very little energy. Brown bats spend up to nineteen hours a day asleep. Giraffes, on the other hand, need only a few hours of sleep, and they often sleep standing up.",
+    "A nap is a short sleep during the day. In some countries, like Spain, an afternoon rest is a tradition. Research shows that twenty minutes of sleep after lunch can improve your mood and attention. But be careful: if you sleep for more than an hour, you may feel even more tired and find it hard to fall asleep at night."],
+  key:[2,1,4,3,7,5], extra:6 },
+
+{ id:"r2", tag:"class", type:"tfns", title:"Задания 13–19", variant:1, topic:"A Garden on the Roof",
+  text:[
+    "When fourteen-year-old Emma Clarke moved to a new school in Manchester, she was surprised that there was no green space at all. The school stood in the city centre, and the only free place was the flat roof of the sports hall.",
+    "“At my old school we had a small garden, and I missed it a lot,” Emma says. “So I asked the head teacher if we could grow vegetables on the roof. She laughed at first, but then she said yes, if I found other students to help.”",
+    "Emma put up posters in the school corridors, and twelve students came to the first meeting. Most of them had never planted anything before. A local garden centre gave the club twenty large wooden boxes and some bags of soil for free, and parents helped to carry everything upstairs.",
+    "The first year was not easy. In May strong winds broke several young tomato plants, and in July the weather was so hot that the students had to water the boxes twice a day, even during the holidays. “We made a timetable, and everybody came to school for one week in the summer,” explains Emma’s friend Leo.",
+    "By September the club had grown potatoes, beans, strawberries and lots of herbs. The school canteen used the vegetables to make soup, and the strawberries were sold at the school fair. With the money, the club bought a small greenhouse.",
+    "Now the roof garden is three years old and has more than forty members, including some teachers. Younger students visit it during biology lessons to learn how plants grow. Emma is planning to study environmental science at university. “The garden taught me that you don’t need a lot of space to change something,” she says. “You just need a good idea and people who believe in it.”"],
+  items:[
+    ["Emma’s old school had a garden.", 1, "“At my old school we had a small garden.”"],
+    ["The head teacher liked Emma’s idea from the very beginning.", 2, "Сначала директор засмеялась: “She laughed at first”."],
+    ["Most members of the club had experience in gardening.", 2, "“Most of them had never planted anything before.”"],
+    ["The garden centre also gave the club some seeds.", 3, "Сказано только про ящики и землю (boxes and soil), про семена ничего нет."],
+    ["The students looked after the garden during the summer holidays.", 1, "“…even during the holidays… everybody came to school for one week in the summer.”"],
+    ["The strawberries were used in the school canteen.", 2, "В столовой готовили суп из овощей, а клубнику продали на ярмарке: “sold at the school fair”."],
+    ["Emma’s parents are biology teachers.", 3, "О профессии родителей Эммы в тексте ничего не сказано."]] },
+
+{ id:"r3", tag:"hw", type:"match", title:"Задание 12", variant:2, topic:"Unusual hotels",
+  questions:[
+    "Where can you sleep under the sea?",
+    "Which hotel is made of ice?",
+    "Where can guests sleep in a tree?",
+    "Which hotel was once a prison?",
+    "Where can animals visit you at breakfast?",
+    "Which hotel is the oldest in the world?",
+    "Where can you watch the northern lights from your bed?"],
+  texts:[
+    "In the small village of Jukkasjärvi in the north of Sweden, a hotel is built again every winter. Artists from different countries come to make the walls, beds and even glasses from blocks of frozen river water. In spring the hotel melts, and the water goes back into the river.",
+    "Hostel Celica in Ljubljana, the capital of Slovenia, used to be a military prison. Today each small room, or “cell”, has been decorated by a different artist. The windows still have bars, but now guests come here for fun, and they can leave whenever they want.",
+    "In Finnish Lapland you can spend the night in a glass igloo. The roof is made of special glass that does not freeze, so you can lie in a warm bed and look at the sky. On a clear winter night you may see green and purple lights dancing above you.",
+    "At Giraffe Manor in Nairobi, Kenya, breakfast is never boring. Tall, friendly giraffes come to the windows of the dining room and put their long necks inside, hoping that the guests will share their food with them.",
+    "One hotel in the Maldives has a bedroom five metres below the surface of the Indian Ocean. Through the glass walls guests can watch fish, turtles and sometimes even sharks swimming around while they are falling asleep.",
+    "In a forest in the north of Sweden, there is a hotel where the rooms hang on pine trees four to six metres above the ground. One of them looks like a bird’s nest, another one is a cube with mirror walls, so it is almost invisible among the trees."],
+  key:[2,4,7,5,1,3], extra:6 },
+
+{ id:"r4", tag:"hw", type:"tfns", title:"Задания 13–19", variant:2, topic:"A Summer at the Zoo",
+  text:[
+    "Last summer seventeen-year-old Daniel Brooks from Bristol spent six weeks working as a volunteer at the city zoo. He had always loved animals, but until then the only pet he had ever had was a goldfish.",
+    "To become a volunteer, Daniel had to fill in a long application form and have an interview. “They asked me why I wanted to work with animals and whether I was ready to get up early,” he remembers. “I said yes to everything, although I’m not really a morning person.”",
+    "His working day started at seven o’clock. First he helped the keepers clean the enclosures, which was the least pleasant part of the job. Then he prepared food for the animals. “You can’t just throw some fruit to a monkey,” Daniel explains. “Every animal has a special diet, and everything has to be weighed.”",
+    "Daniel’s favourite place was the house of the red pandas. There were two of them, and one, called Mango, was very shy. At first she always hid when Daniel came in, but by the end of the summer she took grapes from his hand.",
+    "Not everything was about feeding and cleaning. Several times a day Daniel gave short talks to visitors, mostly families with small children. He was nervous at first because he had never spoken in front of strangers, but soon he started to enjoy it.",
+    "The volunteers were not paid, but they got free lunches and a certificate at the end. More importantly, the experience helped Daniel make an important decision. Before the summer he could not decide between studying economics and biology. Now he is sure: he wants to become a vet. “Working at the zoo showed me that hard work can also be a lot of fun,” he says."],
+  items:[
+    ["Daniel had a lot of pets before he worked at the zoo.", 2, "“…the only pet he had ever had was a goldfish.”"],
+    ["Daniel enjoys getting up early.", 2, "“I’m not really a morning person” — он не любит рано вставать."],
+    ["The food for the animals had to be weighed.", 1, "“…everything has to be weighed.”"],
+    ["Mango was the older of the two red pandas.", 3, "Сказано, что Манго была застенчивой, но про возраст ничего нет."],
+    ["Daniel had spoken in front of strangers before.", 2, "“…he had never spoken in front of strangers.”"],
+    ["Daniel’s parents visited him at the zoo.", 3, "О родителях Дэниела в тексте ничего не сказано."],
+    ["The summer at the zoo helped Daniel choose his future profession.", 1, "“Now he is sure: he wants to become a vet.”"]] },
+
+{ id:"r5", tag:"bonus", type:"tfns", title:"Задания 13–19", variant:3, topic:"The Story of Christmas Lights",
+  text:[
+    "Today it is hard to imagine the winter holidays without colourful lights. But less than a hundred and fifty years ago, people decorated their Christmas trees with real candles. It looked beautiful, but it was also dangerous: dry trees caught fire easily, and many homes burned down.",
+    "The first electric Christmas lights appeared in 1882 in New York. Edward Johnson, a friend and business partner of the famous inventor Thomas Edison, decorated the tree in his living room with eighty small red, white and blue bulbs. A newspaper reporter wrote about it, but many readers thought the story was a joke.",
+    "For a long time electric lights remained a luxury. They were very expensive, and most families did not even have electricity at home. Rich people often hired an electrician to put the lights on their tree.",
+    "According to a popular story, everything changed thanks to a teenager. In 1917, fifteen-year-old Albert Sadacca read about a fire caused by Christmas candles. His family sold decorative lamps, so he suggested selling strings of electric lights for trees. At first, few people bought them, but when Albert painted the bulbs in bright colours, sales grew quickly.",
+    "Today, lights are used not only at Christmas. People hang them in their bedrooms, at weddings and at summer parties. Modern LED bulbs use much less electricity than old ones and almost never get hot, so they are much safer.",
+    "Some towns have even turned lights into a competition. Every December families decorate their houses with thousands of bulbs, and visitors come from other cities to see them."],
+  items:[
+    ["Candles on Christmas trees often caused fires.", 1, "“…dry trees caught fire easily, and many homes burned down.”"],
+    ["Edward Johnson invented the electric light bulb.", 2, "Изобретатель — Томас Эдисон, а Джонсон был его другом и партнёром."],
+    ["All readers believed the newspaper story about Johnson’s tree.", 2, "“…many readers thought the story was a joke.”"],
+    ["Albert Sadacca’s family sold Christmas trees.", 2, "Его семья продавала декоративные лампы: “decorative lamps”."],
+    ["Albert’s parents were against his idea.", 3, "Что думали родители Альберта, в тексте не сказано."],
+    ["LED bulbs are safer than old bulbs.", 1, "“…almost never get hot, so they are much safer.”"],
+    ["The biggest light competition takes place in New York.", 3, "Где проходят конкурсы, не сказано: “some towns”."]] }
+];
+const TAGS = {class:"На занятии", hw:"Домашка", bonus:"Дополнительно"};
+const LET = ["A","B","C","D","E","F"];
+const TFNS = ["True","False","Not stated"];
+const KEY_RES = "ews-read-results";
+
+function store(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k, JSON.stringify(v)); } catch(e){ return null; } }
+const app = document.getElementById("app");
+const put = (...k) => app.append(...k.filter(x => x != null));
+function h(tag, attrs, ...kids){ const e = document.createElement(tag); if (attrs) for (const [k, v] of Object.entries(attrs)){ if (k === "class") e.className = v; else if (k in e) e[k] = v; else e.setAttribute(k, v); } kids.flat().forEach(k => k != null && e.append(k)); return e; }
+const maxOf = t => t.type === "match" ? 6 : 7;
+
+function renderList(){
+  app.innerHTML = "";
+  const results = store(KEY_RES) || {};
+  const nameIn = h("input", {type:"text", id:"student-name", placeholder:"Твоё имя", value:store("ews-name") || ""});
+  nameIn.addEventListener("input", () => store("ews-name", nameIn.value.trim()));
+  const resetBtn = h("button", {type:"button", class:"btn"}, "Сбросить результаты");
+  resetBtn.onclick = () => {
+    if (resetBtn.dataset.sure){ try { localStorage.removeItem(KEY_RES); } catch(e){} renderList(); return; }
+    resetBtn.dataset.sure = "1"; resetBtn.textContent = "Точно сбросить? Нажми ещё раз";
+  };
+  const list = h("div", {class:"list"});
+  TRAININGS.forEach((t, i) => {
+    const r = results[t.id];
+    list.append(h("a", {class:"tcard", href:"#" + t.id},
+      h("span", {class:"tag " + t.tag}, TAGS[t.tag]),
+      h("h3", null, "Тренировка " + (i + 1)),
+      h("p", {class:"hint"}, t.title + " · " + t.topic),
+      r ? h("span", {class:"done"}, "Лучший результат: " + r.best + " / " + r.max) : null));
+  });
+  put(
+    h("div", {class:"top"}, h("a", {href:"index.html"}, "← На главную"), h("span", {class:"hint"}, "Задания 12–19 · 13 баллов")),
+    h("header", {style:"display:flex;flex-direction:column;gap:8px"}, h("h1", null, "Reading: тренажёр"),
+      h("p", {class:"lead"}, "Чтение в формате ОГЭ. Задание 12: найди, в каком тексте ответ на вопрос. Задания 13–19: True, False или Not stated. На всё чтение на экзамене около 30 минут.")),
+    h("div", {class:"name"}, h("label", {for:"student-name"}, "Имя для результата:"), nameIn),
+    list,
+    Object.keys(results).length ? h("div", {style:"display:flex;justify-content:flex-end"}, resetBtn) : null,
+    h("footer", null, "Тексты составлены в формате заданий ФИПИ · English with Sis"));
+}
+
+function renderTraining(t){
+  app.innerHTML = "";
+  const idx = TRAININGS.indexOf(t);
+  const started = Date.now();
+  const form = h("div", {class:"box"});
+  let check;
+
+  if (t.type === "match"){
+    const qs = h("ol", {class:"qlist"}, t.questions.map(q => h("li", null, q)));
+    form.append(h("h2", null, "Questions"), qs, h("h2", null, "Texts"));
+    t.texts.forEach((tx, i) => form.append(h("div", {class:"rtext"}, h("b", {class:"let"}, LET[i]), h("p", null, tx))));
+    const sels = LET.map(L => { const s = h("select", {"aria-label":"Текст " + L}, h("option", {value:""}, "–")); for (let n = 1; n <= 7; n++) s.append(h("option", {value:String(n)}, String(n))); return s; });
+    const cells = sels.map((s, i) => h("div", {class:"q"}, h("span", {class:"n"}, LET[i]), s, h("span", {class:"fix"})));
+    form.append(h("h2", null, "Ответ"), h("p", {class:"hint"}, "Под каждой буквой текста выбери номер вопроса. Один вопрос лишний."), h("div", {class:"match"}, cells));
+    check = () => sels.map((s, i) => {
+      const ok = Number(s.value) === t.key[i];
+      cells[i].className = "q " + (ok ? "ok" : "no");
+      cells[i].querySelector(".fix").textContent = ok ? "верно" : "ответ: " + t.key[i];
+      return ok;
+    });
+  } else {
+    form.append(h("h2", null, t.topic));
+    t.text.forEach(p => form.append(h("p", {class:"para"}, p)));
+    const blocks = t.items.map(([s, a, why], i) => {
+      const n = 13 + i;
+      const opts = TFNS.map((lab, j) => h("label", {class:"opt"}, h("input", {type:"radio", name:"q" + n, value:String(j + 1)}), (j + 1) + " — " + lab));
+      return h("div", {class:"q"}, h("span", {class:"n"}, String(n)), h("p", {style:"font-weight:700"}, s), h("div", {class:"tf"}, opts), h("p", {class:"fix"}));
+    });
+    form.append(h("h2", null, "Statements"), ...blocks);
+    check = () => t.items.map(([s, a, why], i) => {
+      const v = blocks[i].querySelector("input:checked");
+      const ok = v && Number(v.value) === a;
+      blocks[i].className = "q " + (ok ? "ok" : "no");
+      blocks[i].querySelector(".fix").textContent = (ok ? "Верно. " : "Правильный ответ: " + a + " — " + TFNS[a - 1] + ". ") + why;
+      return ok;
+    });
+  }
+
+  const out = h("div");
+  const checkBtn = h("button", {type:"button", class:"btn pink", id:"check"}, "Проверить");
+  checkBtn.onclick = () => {
+    const res = check(); const score = res.filter(Boolean).length;
+    const all = store(KEY_RES) || {};
+    const prev = all[t.id]; all[t.id] = {best:Math.max(score, prev ? prev.best : 0), max:res.length}; store(KEY_RES, all);
+    const name = store("ews-name") || "";
+    const d = new Date(); const mins = Math.max(1, Math.round((Date.now() - started) / 60000));
+    out.innerHTML = "";
+    out.append(h("div", {class:"result"},
+      h("p", null, (name ? name + " · " : "") + "Тренировка " + (idx + 1) + " · " + t.title + " · " + t.topic),
+      h("p", {class:"big"}, score + " / " + res.length),
+      h("p", null, score === res.length ? "Идеально!" : score >= res.length * 0.7 ? "Отлично!" : "Посмотри разбор: под каждым ответом есть подсказка."),
+      h("p", {style:"opacity:.85;font-size:14px"}, d.toLocaleDateString("ru-RU") + " " + d.toLocaleTimeString("ru-RU", {hour:"2-digit", minute:"2-digit"}) + " · время: " + mins + " мин")));
+    if (t.type === "match") out.append(h("p", {class:"hint", style:"margin-top:10px"}, "Лишний вопрос: " + t.extra + " — " + t.questions[t.extra - 1]));
+    checkBtn.disabled = true;
+    out.scrollIntoView({behavior:"smooth", block:"start"});
+  };
+  const again = h("button", {type:"button", class:"btn", id:"again"}, "Начать заново");
+  again.onclick = () => { renderTraining(t); window.scrollTo(0, 0); };
+  put(
+    h("div", {class:"top"}, h("a", {href:"#"}, "← Все тренировки"), h("span", {class:"tag " + t.tag}, TAGS[t.tag])),
+    h("h1", null, "Тренировка " + (idx + 1) + ": " + t.title),
+    h("p", {class:"instr"}, t.type === "match" ? I12 : I1319),
+    form,
+    h("div", {class:"player"}, checkBtn, again),
+    out);
+}
+
+function route(){
+  const id = location.hash.slice(1);
+  const t = TRAININGS.find(x => x.id === id);
+  t ? renderTraining(t) : renderList();
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Career Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: list of trainings → one training view (instructions, player, questions, result). */
+:root{
+  --bg:#FBF7F1; --surface:#FFFFFF; --fg:#22193A; --muted:#625A74; --line:#E7E0EC;
+  --pink:#E2457E; --pink-soft:#FCE6EE; --blue:#3A57E8; --blue-soft:#E6EBFD;
+  --sun:#F2C232; --sun-soft:#FDF3D2; --ok:#16936A; --ok-soft:#DDF4EB; --bad:#C8384A; --bad-soft:#FBE3E6;
+  --display:"Unbounded","Arial Black",Arial,sans-serif; --body:"Nunito","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(26px,6vw,40px)} h2{font-size:clamp(20px,4.5vw,26px)} h3{font-size:18px}
+p{margin:0}
+a{color:var(--blue)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.top a{color:var(--muted);font-weight:700;text-decoration:none;font-size:15px}
+.lead{color:var(--muted)}
+.hint{color:var(--muted);font-size:15px}
+.name{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:700}
+input[type=text]{font:inherit;font-weight:700;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--fg);min-width:0}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.tcard{display:flex;flex-direction:column;gap:8px;padding:18px;border-radius:20px;background:var(--surface);border:2px solid var(--line);text-decoration:none;color:var(--fg)}
+.tcard:hover{border-color:var(--fg)}
+.tcard .done{font-weight:800;color:var(--ok);font-size:14px}
+.tag{align-self:flex-start;font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:8px}
+.tag.class{background:var(--blue-soft);color:var(--blue)} .tag.hw{background:var(--pink-soft);color:var(--pink)} .tag.bonus{background:var(--sun-soft);color:var(--fg)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.instr{background:var(--sun-soft);border-radius:16px;padding:14px 16px;font-size:16px}
+.player{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:inherit;font-weight:800;border-radius:999px;cursor:pointer;border:2px solid var(--line);background:var(--surface);color:var(--fg);padding:11px 20px}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.pink{background:var(--pink);border-color:var(--pink);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.status{font-weight:700;color:var(--muted)}
+.status b{color:var(--pink)}
+.listens{display:flex;gap:6px}
+.listens i{width:14px;height:14px;border-radius:50%;background:var(--line);display:inline-block}
+.listens i.on{background:var(--pink)}
+label.chk{display:flex;gap:8px;align-items:center;font-size:15px;color:var(--muted);font-weight:700}
+.q{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:16px;border:2px solid var(--line)}
+.q .n{font-family:var(--display);font-weight:700;color:var(--pink)}
+.q label.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:12px;cursor:pointer}
+.q label.opt:hover{background:var(--blue-soft)}
+.q.ok{border-color:var(--ok);background:var(--ok-soft)}
+.q.no{border-color:var(--bad);background:var(--bad-soft)}
+.fix{font-weight:800;font-size:15px}
+.q.ok .fix{color:var(--ok)} .q.no .fix{color:var(--bad)}
+.stm{display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-radius:14px;background:var(--blue-soft);font-size:16px}
+.match{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media (max-width:520px){.match{grid-template-columns:repeat(3,1fr)}}
+.match .q{align-items:center;padding:10px}
+select{font:inherit;font-weight:800;font-size:18px;padding:6px 10px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--fg)}
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+td.ans{width:38%}
+td input{min-width:100px}
+td,th{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:middle}
+th{font-family:var(--display);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.num{font-family:var(--display);font-weight:700;color:var(--pink);width:44px}
+td input{width:100%}
+tr.ok td{background:var(--ok-soft)} tr.no td{background:var(--bad-soft)}
+.result{background:var(--blue);color:#fff;border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:8px}
+.result .big{font-family:var(--display);font-size:44px;font-weight:800;line-height:1}
+.result p{color:#fff}
+details{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+summary{cursor:pointer;font-weight:800}
+.script p{margin-top:8px;font-size:16px}
+.script b{color:var(--blue)}
+.warn{background:var(--bad-soft);color:var(--bad);border-radius:14px;padding:12px 16px;font-weight:700}
+footer{color:var(--muted);font-size:14px;text-align:center}
+.ru{color:var(--muted);font-size:14px;font-weight:600}
+.hide-ru .ru{display:none}
+.item{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:16px;border:2px solid var(--line);background:var(--surface)}
+.item.done{border-color:var(--blue)}
+.item .s{font-weight:800;font-size:17px}
+.scale{display:flex;flex-wrap:wrap;gap:8px}
+.scale label{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:2px solid var(--line);cursor:pointer;font-weight:700;font-size:15px}
+.scale input{accent-color:var(--blue)}
+.scale label:has(input:checked){border-color:var(--blue);background:var(--blue-soft)}
+.progress{position:sticky;top:0;z-index:2;background:var(--bg);padding:10px 0;display:flex;flex-direction:column;gap:6px}
+.bar{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pink);width:0;transition:width .3s}
+.bars{display:flex;flex-direction:column;gap:8px}
+.brow{display:grid;grid-template-columns:120px 1fr 44px;gap:10px;align-items:center;font-weight:800;font-size:15px}
+.brow .bar i{background:var(--blue)}
+.brow.top .bar i{background:var(--pink)}
+.type{display:flex;flex-direction:column;gap:8px;padding:18px;border-radius:20px;background:var(--surface);border:2px solid var(--line)}
+.type h3{font-size:20px}
+.jobs{display:flex;flex-wrap:wrap;gap:8px}
+.jobs span{padding:6px 12px;border-radius:999px;background:var(--sun-soft);font-weight:700;font-size:15px}
+.jobs span small{color:var(--muted);font-weight:600}
+.speak{background:var(--pink-soft);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.toggle{display:flex;gap:8px;align-items:center;font-weight:700;color:var(--muted);font-size:15px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* Career interests test (Holland RIASEC model, simplified for teenagers). Scoring: Yes = 2, Not sure = 1, No = 0. */
+const TYPES = {
+  R:{name:"The Maker", ru:"Практик", color:"#E2457E",
+     en:"You like doing real things with your hands and seeing the result. You enjoy tools, machines, sport, nature and practical tasks more than long talks.",
+     tr:"Тебе нравится делать что-то руками и видеть результат. Инструменты, техника, спорт и природа тебе ближе, чем долгие разговоры.",
+     jobs:[["engineer","инженер"],["pilot","пилот"],["mechanic","механик"],["chef","повар"],["architect","архитектор"],["vet","ветеринар"]]},
+  I:{name:"The Thinker", ru:"Исследователь", color:"#3A57E8",
+     en:"You are curious and love to understand how things work. You like solving problems, asking “why?” and finding answers in facts and numbers.",
+     tr:"Ты любознательный человек и любишь понимать, как всё устроено. Тебе нравится решать задачи, спрашивать «почему?» и искать ответы в фактах и цифрах.",
+     jobs:[["scientist","учёный"],["doctor","врач"],["software developer","программист"],["data analyst","аналитик данных"],["pharmacist","фармацевт"],["researcher","исследователь"]]},
+  A:{name:"The Creator", ru:"Творец", color:"#9B4BD8",
+     en:"You have lots of ideas and like to express yourself. You enjoy art, music, writing, design and anything where you can be original.",
+     tr:"У тебя много идей, и ты любишь выражать себя. Тебе нравятся искусство, музыка, тексты, дизайн и всё, где можно быть оригинальной.",
+     jobs:[["designer","дизайнер"],["photographer","фотограф"],["journalist","журналист"],["musician","музыкант"],["actor","актёр"],["video editor","видеомонтажёр"]]},
+  S:{name:"The Helper", ru:"Помощник", color:"#16936A",
+     en:"You care about people and like to help them. You are a good listener, you enjoy teamwork and explaining things to others.",
+     tr:"Тебе важны люди, и ты любишь помогать. Ты хорошо слушаешь, любишь работать в команде и объяснять что-то другим.",
+     jobs:[["teacher","учитель"],["psychologist","психолог"],["nurse","медсестра / медбрат"],["sports coach","тренер"],["HR manager","HR-менеджер"],["tour guide","гид"]]},
+  E:{name:"The Leader", ru:"Лидер", color:"#E58A12",
+     en:"You are energetic and like to lead. You enjoy convincing people, making decisions, competing and starting new projects.",
+     tr:"Ты энергичный человек и любишь вести за собой. Тебе нравится убеждать, принимать решения, соревноваться и запускать новые проекты.",
+     jobs:[["entrepreneur","предприниматель"],["project manager","проджект-менеджер"],["lawyer","юрист"],["marketing specialist","маркетолог"],["event manager","организатор мероприятий"],["product manager","продакт-менеджер"]]},
+  C:{name:"The Organiser", ru:"Организатор", color:"#5E6B7A",
+     en:"You like order, plans and clear rules. You are careful with details and good at working with numbers, tables and documents.",
+     tr:"Ты любишь порядок, планы и понятные правила. Ты внимательна к деталям и хорошо работаешь с цифрами, таблицами и документами.",
+     jobs:[["accountant","бухгалтер"],["financial analyst","финансовый аналитик"],["logistics manager","логист"],["office manager","офис-менеджер"],["librarian","библиотекарь"],["auditor","аудитор"]]}
+};
+const ITEMS = [
+  ["R","I like fixing things, for example a bike or a broken phone.","Мне нравится чинить вещи, например велосипед или сломанный телефон."],
+  ["I","I enjoy solving maths or logic puzzles.","Мне нравится решать математические или логические задачи."],
+  ["A","I like drawing, painting or designing things.","Мне нравится рисовать или придумывать дизайн."],
+  ["S","My friends often come to me when they have a problem.","Друзья часто приходят ко мне, когда у них проблема."],
+  ["E","I like being the leader of a group.","Мне нравится быть лидером в группе."],
+  ["C","I like keeping my things neat and organised.","Мне нравится, когда мои вещи в порядке."],
+  ["R","I prefer to spend my free time outdoors.","Я предпочитаю проводить свободное время на улице."],
+  ["I","I often ask “why?” and look for the answer online.","Я часто спрашиваю «почему?» и ищу ответ в интернете."],
+  ["A","I enjoy writing stories, poems or song lyrics.","Мне нравится писать истории, стихи или тексты песен."],
+  ["S","I enjoy explaining things to younger children.","Мне нравится объяснять что-то младшим детям."],
+  ["E","I can easily persuade people to agree with me.","Мне легко убедить людей согласиться со мной."],
+  ["C","I make plans and to-do lists.","Я составляю планы и списки дел."],
+  ["R","I like building things, for example furniture or models.","Мне нравится собирать вещи, например мебель или модели."],
+  ["I","I like science experiments.","Мне нравятся научные эксперименты."],
+  ["A","I play music, sing or dance.","Я играю музыку, пою или танцую."],
+  ["S","I would like to do volunteer work.","Мне хотелось бы заниматься волонтёрством."],
+  ["E","I would like to start my own business one day.","Когда-нибудь я хотела бы открыть своё дело."],
+  ["C","I like working with numbers and tables.","Мне нравится работать с цифрами и таблицами."],
+  ["R","I enjoy looking after animals or plants.","Мне нравится ухаживать за животными или растениями."],
+  ["I","I like reading about space, the human body or history.","Мне нравится читать про космос, тело человека или историю."],
+  ["A","I like making videos or taking photos.","Мне нравится снимать видео или фотографировать."],
+  ["S","I prefer working in a team to working alone.","Мне больше нравится работать в команде, чем одной."],
+  ["E","I enjoy organising parties and events.","Мне нравится организовывать вечеринки и мероприятия."],
+  ["C","I like clear rules and instructions.","Мне нравятся чёткие правила и инструкции."],
+  ["R","I learn best when I can try something in practice.","Лучше всего я учусь, когда могу попробовать на практике."],
+  ["I","I can work on a difficult problem for a long time.","Я могу долго разбираться в сложной задаче."],
+  ["A","I often have unusual ideas.","У меня часто бывают необычные идеи."],
+  ["S","It’s easy for me to understand how other people feel.","Мне легко понять, что чувствуют другие люди."],
+  ["E","I like competitions and I want to win.","Я люблю соревнования и хочу побеждать."],
+  ["C","I notice small mistakes that other people miss.","Я замечаю мелкие ошибки, которые другие пропускают."]
+];
+const SCALE = [["Yes, that’s me", 2], ["Not sure", 1], ["No", 0]];
+const KEY = "ews-career";
+
+function store(k, v){ try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k, JSON.stringify(v)); } catch(e){ return null; } }
+const app = document.getElementById("app");
+function h(tag, attrs, ...kids){ const e = document.createElement(tag); if (attrs) for (const [k, v] of Object.entries(attrs)){ if (k === "class") e.className = v; else if (k in e) e[k] = v; else e.setAttribute(k, v); } kids.flat().forEach(k => k != null && e.append(k)); return e; }
+
+function renderTest(){
+  app.innerHTML = "";
+  const answers = {};
+  const nameIn = h("input", {type:"text", id:"student-name", placeholder:"Your name", value:store("ews-name") || ""});
+  nameIn.addEventListener("input", () => store("ews-name", nameIn.value.trim()));
+  const ruChk = h("input", {type:"checkbox", id:"ru", checked:true});
+  ruChk.onchange = () => app.classList.toggle("hide-ru", !ruChk.checked);
+  const barFill = h("i"); const cnt = h("span", {class:"hint"}, "0 / " + ITEMS.length);
+  const goBtn = h("button", {type:"button", class:"btn pink", disabled:true}, "Show my result");
+  const list = h("div", {style:"display:flex;flex-direction:column;gap:10px"});
+  ITEMS.forEach(([t, en, ru], i) => {
+    const box = h("div", {class:"item"});
+    const sc = h("div", {class:"scale"}, SCALE.map(([lab, v]) => {
+      const inp = h("input", {type:"radio", name:"i" + i, value:String(v)});
+      inp.onchange = () => { answers[i] = v; box.classList.add("done"); const n = Object.keys(answers).length; barFill.style.width = (n / ITEMS.length * 100) + "%"; cnt.textContent = n + " / " + ITEMS.length; goBtn.disabled = n < ITEMS.length; };
+      return h("label", null, inp, lab);
+    }));
+    box.append(h("p", {class:"s"}, (i + 1) + ". " + en), h("p", {class:"ru"}, ru), sc);
+    list.append(box);
+  });
+  goBtn.onclick = () => {
+    const score = {R:0, I:0, A:0, S:0, E:0, C:0};
+    ITEMS.forEach(([t], i) => score[t] += answers[i]);
+    const res = {score, date:new Date().toISOString(), name:store("ews-name") || ""};
+    store(KEY, res); renderResult(res); window.scrollTo(0, 0);
+  };
+  app.append(
+    h("div", {class:"top"}, h("a", {href:"index.html"}, "← На главную"), h("span", {class:"hint"}, "30 statements · 7 minutes")),
+    h("header", {style:"display:flex;flex-direction:column;gap:8px"}, h("h1", null, "What job is right for you?"),
+      h("p", {class:"lead"}, "Read each statement and choose how much it is true about you. There are no right or wrong answers."),
+      h("p", {class:"ru"}, "Прочитай каждое утверждение и выбери, насколько оно про тебя. Правильных и неправильных ответов нет.")),
+    h("div", {class:"name"}, h("label", {for:"student-name"}, "Name:"), nameIn),
+    h("label", {class:"toggle", for:"ru"}, ruChk, "Показывать перевод"),
+    h("div", {class:"progress"}, h("div", {class:"bar"}, barFill), cnt),
+    list,
+    h("div", {class:"player"}, goBtn),
+    h("footer", null, "Based on John Holland’s career interest model (RIASEC) · English with Sis"));
+}
+
+function renderResult(res){
+  app.innerHTML = "";
+  const order = Object.keys(res.score).sort((a, b) => res.score[b] - res.score[a]);
+  const top = order.slice(0, 2);
+  const max = 10;
+  const d = new Date(res.date);
+  const bars = h("div", {class:"bars"}, order.map(k => h("div", {class:"brow" + (top.includes(k) ? " top" : "")},
+    h("span", null, TYPES[k].name), h("div", {class:"bar"}, h("i", {style:"width:" + (res.score[k] / max * 100) + "%"})), h("span", null, res.score[k] + "/" + max))));
+  const again = h("button", {type:"button", class:"btn"}, "Take the test again");
+  again.onclick = () => { renderTest(); window.scrollTo(0, 0); };
+  app.append(
+    h("div", {class:"top"}, h("a", {href:"index.html"}, "← На главную"), h("span", {class:"hint"}, "Your result")),
+    h("div", {class:"result"},
+      h("p", null, (res.name ? res.name + " · " : "") + "Career test · " + d.toLocaleDateString("ru-RU")),
+      h("p", {class:"big", style:"font-size:32px"}, TYPES[top[0]].name + " + " + TYPES[top[1]].name),
+      h("p", null, TYPES[top[0]].ru + " + " + TYPES[top[1]].ru)),
+    h("div", {class:"box"}, h("h2", null, "Your profile"), bars),
+    ...top.map((k, i) => h("div", {class:"type"},
+      h("span", {class:"tag " + (i ? "hw" : "class")}, i ? "Second type" : "Main type"),
+      h("h3", null, TYPES[k].name + " · " + TYPES[k].ru),
+      h("p", null, TYPES[k].en), h("p", {class:"ru"}, TYPES[k].tr),
+      h("p", {style:"font-weight:800"}, "Jobs you might like:"),
+      h("div", {class:"jobs"}, TYPES[k].jobs.map(([en, ru]) => h("span", null, en + " ", h("small", null, "· " + ru)))))),
+    h("div", {class:"speak"},
+      h("h3", null, "Get ready to talk about it"),
+      h("p", null, "My main type is … . I think it’s true / not true because … ."),
+      h("p", null, "In the future I would like to be a … because … ."),
+      h("p", {class:"ru"}, "Подготовь 4–5 предложений по-английски: на занятии обсудим результат — это тренировка устной части ОГЭ.")),
+    h("p", {class:"hint"}, "Это не диагноз, а подсказка: тест показывает, что тебе интересно сейчас. Интересы могут меняться."),
+    h("div", {class:"player"}, again));
+}
+
+const saved = store(KEY);
+saved && saved.score ? renderResult(saved) : renderTest();
+</script>
+</body>
+</html>
