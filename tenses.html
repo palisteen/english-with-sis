@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tenses with Snowball</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: list of trainings → one training view (instructions, player, questions, result). */
+:root{
+  --bg:#FBF7F1; --surface:#FFFFFF; --fg:#22193A; --muted:#625A74; --line:#E7E0EC;
+  --pink:#E2457E; --pink-soft:#FCE6EE; --blue:#3A57E8; --blue-soft:#E6EBFD;
+  --sun:#F2C232; --sun-soft:#FDF3D2; --ok:#16936A; --ok-soft:#DDF4EB; --bad:#C8384A; --bad-soft:#FBE3E6;
+  --display:"Unbounded","Arial Black",Arial,sans-serif; --body:"Nunito","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17122A; --surface:#211A39; --fg:#F4EFFA; --muted:#B5ACC8; --line:#352C52;
+  --pink:#FF6FA3; --pink-soft:#3A1F35; --blue:#8EA2FF; --blue-soft:#232A55;
+  --sun:#F6CE55; --sun-soft:#3A3220; --ok:#4FD3A3; --ok-soft:#163A30; --bad:#FF7D8C; --bad-soft:#40212A; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(26px,6vw,40px)} h2{font-size:clamp(20px,4.5vw,26px)} h3{font-size:18px}
+p{margin:0}
+a{color:var(--blue)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.top a{color:var(--muted);font-weight:700;text-decoration:none;font-size:15px}
+.lead{color:var(--muted)}
+.hint{color:var(--muted);font-size:15px}
+.name{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:700}
+input[type=text]{font:inherit;font-weight:700;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--fg);min-width:0}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.tcard{display:flex;flex-direction:column;gap:8px;padding:18px;border-radius:20px;background:var(--surface);border:2px solid var(--line);text-decoration:none;color:var(--fg)}
+.tcard:hover{border-color:var(--fg)}
+.tcard .done{font-weight:800;color:var(--ok);font-size:14px}
+.tag{align-self:flex-start;font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:8px}
+.tag.class{background:var(--blue-soft);color:var(--blue)} .tag.hw{background:var(--pink-soft);color:var(--pink)} .tag.bonus{background:var(--sun-soft);color:var(--fg)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.instr{background:var(--sun-soft);border-radius:16px;padding:14px 16px;font-size:16px}
+.player{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:inherit;font-weight:800;border-radius:999px;cursor:pointer;border:2px solid var(--line);background:var(--surface);color:var(--fg);padding:11px 20px}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.pink{background:var(--pink);border-color:var(--pink);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.status{font-weight:700;color:var(--muted)}
+.status b{color:var(--pink)}
+.listens{display:flex;gap:6px}
+.listens i{width:14px;height:14px;border-radius:50%;background:var(--line);display:inline-block}
+.listens i.on{background:var(--pink)}
+label.chk{display:flex;gap:8px;align-items:center;font-size:15px;color:var(--muted);font-weight:700}
+.q{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:16px;border:2px solid var(--line)}
+.q .n{font-family:var(--display);font-weight:700;color:var(--pink)}
+.q label.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:12px;cursor:pointer}
+.q label.opt:hover{background:var(--blue-soft)}
+.q.ok{border-color:var(--ok);background:var(--ok-soft)}
+.q.no{border-color:var(--bad);background:var(--bad-soft)}
+.fix{font-weight:800;font-size:15px}
+.q.ok .fix{color:var(--ok)} .q.no .fix{color:var(--bad)}
+.stm{display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-radius:14px;background:var(--blue-soft);font-size:16px}
+.match{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media (max-width:520px){.match{grid-template-columns:repeat(3,1fr)}}
+.match .q{align-items:center;padding:10px}
+select{font:inherit;font-weight:800;font-size:18px;padding:6px 10px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--fg)}
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+td.ans{width:38%}
+td input{min-width:100px}
+td,th{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:middle}
+th{font-family:var(--display);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.num{font-family:var(--display);font-weight:700;color:var(--pink);width:44px}
+td input{width:100%}
+tr.ok td{background:var(--ok-soft)} tr.no td{background:var(--bad-soft)}
+.result{background:var(--blue);color:#fff;border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:8px}
+.result .big{font-family:var(--display);font-size:44px;font-weight:800;line-height:1}
+.result p{color:#fff}
+details{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+summary{cursor:pointer;font-weight:800}
+.script p{margin-top:8px;font-size:16px}
+.script b{color:var(--blue)}
+.warn{background:var(--bad-soft);color:var(--bad);border-radius:14px;padding:12px 16px;font-weight:700}
+footer{color:var(--muted);font-size:14px;text-align:center}
+.hero2{background:linear-gradient(135deg,#1F4D3D,#14332A);color:#F4F1EC;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.hero2 h1{color:#F4F1EC}
+.hero2 .lead{color:#CFE3D9}
+.hero2 .star{position:absolute;right:18px;top:14px;font-size:34px}
+.ttab{overflow-x:auto;border-radius:18px;border:1px solid var(--line);background:var(--surface)}
+.ttab table{min-width:640px}
+.ttab th,.ttab td{vertical-align:top}
+.ttab td.cell{cursor:pointer;transition:background .15s}
+.ttab td.cell:hover{background:var(--blue-soft)}
+.ttab td.cell.sel{background:var(--sun-soft);box-shadow:inset 0 0 0 2px var(--sun)}
+.ttab td.rare{color:var(--muted);font-size:14px}
+.ttab .nm{font-family:var(--display);font-size:13px;font-weight:700;display:block;margin-bottom:4px}
+.ttab .fm{font-weight:800;color:var(--pink);display:block}
+.ttab .ex{font-size:14px;color:var(--muted);display:block;margin-top:4px}
+.ttab th.rowh{font-family:var(--display);font-size:12px;color:var(--fg);background:var(--bg)}
+.lab{display:flex;flex-direction:column;gap:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-weight:800;font-size:15px;padding:8px 14px;border-radius:999px;border:2px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip.t[aria-pressed=true]{background:var(--pink);border-color:var(--pink)}
+.scene{position:relative;border-radius:20px;background:linear-gradient(#E9F1FB,#F8F3EA);overflow:hidden;border:1px solid var(--line)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .scene{background:linear-gradient(#1C2547,#2A2140)}}
+:root[data-theme="dark"] .scene{background:linear-gradient(#1C2547,#2A2140)}
+.scene svg{display:block;width:100%;height:auto}
+.scene.past svg{filter:sepia(.75) saturate(.8)}
+.scene.future svg{opacity:.5}
+.scene.future{border-style:dashed;border-width:2px}
+.scene .when{position:absolute;left:12px;top:10px;font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:8px;background:rgba(255,255,255,.85);color:#22193A}
+.scene .when{max-width:58%}
+.scene .res{position:absolute;right:12px;top:10px;font-weight:800;font-size:14px;padding:5px 10px;border-radius:8px;background:#DDF4EB;color:#0E6B4C}
+.scene.moving .cat{animation:bob .7s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){.scene.moving .cat{animation:none}}
+.sent{font-size:22px;font-weight:700;line-height:1.35}
+.sent b{color:var(--pink)}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.meta{grid-template-columns:1fr}}
+.meta div{background:var(--bg);border-radius:14px;padding:10px 14px}
+.meta small{display:block;color:var(--muted);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+.tl svg{width:100%;height:auto;display:block}
+.quiz .q{gap:10px}
+.quiz .opts{display:flex;flex-wrap:wrap;gap:8px}
+.quiz .opts button{font:inherit;font-weight:700;padding:8px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.quiz .opts button.right{border-color:var(--ok);background:var(--ok-soft)}
+.quiz .opts button.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.quiz .why{font-size:15px;color:var(--muted)}
+.score{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-weight:800}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="index.html">← На главную</a><span class="hint">Времена в ОГЭ · задания 20–28</span></div>
+  <header class="hero2">
+    <span class="star" aria-hidden="true">⭐</span>
+    <h1>Tenses with Snowball</h1>
+    <p class="lead">Все времена, которые нужны для ОГЭ, в одной таблице. А котёнок Снежок покажет, чем они отличаются: выбери время и действие и посмотри, что происходит.</p>
+  </header>
+
+  <section class="box" aria-labelledby="h-table">
+    <h2 id="h-table">Таблица времён</h2>
+    <p class="hint">Нажми на клетку, и Снежок покажет это время ниже.</p>
+    <div class="ttab" id="ttab"></div>
+    <p class="hint">Серым — времена, которые в заданиях ОГЭ почти не встречаются. Их достаточно узнавать.</p>
+  </section>
+
+  <section class="box lab" aria-labelledby="h-lab" id="lab">
+    <h2 id="h-lab">Что делает Снежок?</h2>
+    <div class="chips" id="tenseChips" role="group" aria-label="Время"></div>
+    <div class="chips" id="actChips" role="group" aria-label="Действие"></div>
+    <div class="chips" id="numChips" role="group" aria-label="Кто"></div>
+    <div class="scene" id="scene" aria-live="polite"></div>
+    <p class="sent" id="sent"></p>
+    <div class="tl" id="tl" aria-hidden="true"></div>
+    <div class="meta" id="meta"></div>
+  </section>
+
+  <section class="box quiz" aria-labelledby="h-quiz">
+    <h2 id="h-quiz">Проверь себя</h2>
+    <p class="lead">Выбери правильную форму. Подсказка: ищи слова-маркеры.</p>
+    <div id="quiz" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="score"><span id="score"></span><button type="button" class="btn" id="reset">Пройти заново</button></div>
+  </section>
+
+  <footer>English with Sis · Happy New Year! 🎄</footer>
+</div>
+
+<script>
+/* ---------- Data ---------- */
+const VERBS = {
+  play:  {label:"🎾 играть с шариком", f:["play","plays","playing","played","played"], obj:"with a Christmas ball"},
+  climb: {label:"🎄 лезть на ёлку",     f:["climb","climbs","climbing","climbed","climbed"], obj:"the Christmas tree"},
+  eat:   {label:"🐟 есть рыбку",        f:["eat","eats","eating","ate","eaten"], obj:"some fish"},
+  sleep: {label:"💤 спать",             f:["sleep","sleeps","sleeping","slept","slept"], obj:"under the tree"}
+};
+// time: past|now|future (scene tint); move: animate kitten; result: show “already done”; tl: timeline drawing
+const TENSES = [
+  {id:"ps",  name:"Present Simple", row:"Present", col:"Simple", formula:"V / V-s", when:"Обычно, регулярно, всегда; факты.", signals:"every day, usually, often, always, never",
+   time:"now", tl:"repeat", label:"every day",
+   make:(s,p,v,o)=> `${s} <b>${p ? v.f[0] : v.f[1]}</b> ${o} every day.`},
+  {id:"pc",  name:"Present Continuous", row:"Present", col:"Continuous", formula:"am / is / are + V-ing", when:"Прямо сейчас, в этот момент.", signals:"now, right now, at the moment, Look!, Listen!",
+   time:"now", move:true, tl:"spanNow", label:"right now",
+   make:(s,p,v,o)=> `Look! ${s} <b>${p ? "are" : "is"} ${v.f[2]}</b> ${o} right now.`},
+  {id:"pp",  name:"Present Perfect", row:"Present", col:"Perfect", formula:"have / has + V3", when:"Уже сделал, и результат важен сейчас.", signals:"already, just, yet, ever, never, since, for",
+   time:"now", result:true, tl:"toNow", label:"just now",
+   make:(s,p,v,o)=> `${s} <b>${p ? "have" : "has"} just ${v.f[4]}</b> ${o}.`},
+  {id:"ppc", name:"Present Perfect Continuous", row:"Present", col:"Perfect Continuous", formula:"have / has been + V-ing", when:"Началось в прошлом и длится до сих пор. Важно, как долго.", signals:"for two hours, since morning, How long…?",
+   time:"now", move:true, tl:"spanToNow", label:"for two hours",
+   make:(s,p,v,o)=> `${s} <b>${p ? "have" : "has"} been ${v.f[2]}</b> ${o} for two hours.`},
+  {id:"pas", name:"Past Simple", row:"Past", col:"Simple", formula:"V2 / V-ed", when:"Случилось в прошлом, закончилось.", signals:"yesterday, last week, two days ago, in 2020",
+   time:"past", tl:"pointPast", label:"yesterday",
+   make:(s,p,v,o)=> `${s} <b>${v.f[3]}</b> ${o} yesterday.`},
+  {id:"pac", name:"Past Continuous", row:"Past", col:"Continuous", formula:"was / were + V-ing", when:"Процесс в определённый момент в прошлом.", signals:"at 5 o’clock yesterday, when…, while…",
+   time:"past", move:true, tl:"spanPast", label:"yesterday at 5",
+   make:(s,p,v,o)=> `${s} <b>${p ? "were" : "was"} ${v.f[2]}</b> ${o} when Mum came home.`},
+  {id:"pap", name:"Past Perfect", row:"Past", col:"Perfect", formula:"had + V3", when:"Случилось раньше другого действия в прошлом.", signals:"before, after, by the time, already",
+   time:"past", result:true, tl:"twoPast", label:"before the guests",
+   make:(s,p,v,o)=> `${s} <b>had already ${v.f[4]}</b> ${o} before the guests arrived.`},
+  {id:"fs",  name:"Future Simple", row:"Future", col:"Simple", formula:"will + V", when:"Будет в будущем; решение, обещание, прогноз.", signals:"tomorrow, next week, soon, I think…",
+   time:"future", tl:"pointFuture", label:"tomorrow",
+   make:(s,p,v,o)=> `${s} <b>will ${v.f[0]}</b> ${o} tomorrow.`},
+  {id:"fip", name:"Future-in-the-Past", row:"Future", col:"in the Past", formula:"would + V", when:"Будущее, если смотреть из прошлого (часто после said / thought).", signals:"said that…, thought that…, knew that…",
+   time:"future", tl:"fip", label:"said that… later",
+   make:(s,p,v,o)=> `Mum said that ${s.toLowerCase().replace("snowball","Snowball")} <b>would ${v.f[0]}</b> ${o} later.`}
+];
+const RARE = {"Future|Continuous":"will be + V-ing", "Future|Perfect":"will have + V3", "Past|Perfect Continuous":"had been + V-ing"};
+
+/* ---------- Table ---------- */
+let state = {t:"pc", v:"play", plural:false};
+function el(tag, attrs, ...kids){ const e = document.createElement(tag); if (attrs) for (const [k, v] of Object.entries(attrs)){ if (k === "class") e.className = v; else if (k.startsWith("on")) e[k] = v; else e.setAttribute(k, v); } kids.flat().forEach(k => k != null && e.append(k)); return e; }
+function exampleFor(t){ const d = document.createElement("span"); d.innerHTML = t.make("Snowball", false, VERBS.play, "with a ball"); return d.textContent; }
+function buildTable(){
+  const cols = ["Simple", "Continuous", "Perfect", "Perfect Continuous"];
+  const tbl = el("table");
+  tbl.append(el("tr", null, el("th", null, ""), cols.map(c => el("th", null, c))));
+  ["Present", "Past", "Future"].forEach(r => {
+    const tr = el("tr", null, el("th", {class:"rowh", scope:"row"}, r));
+    cols.forEach(c => {
+      let t = TENSES.find(x => x.row === r && x.col === c);
+      if (r === "Future" && c === "Perfect Continuous") t = TENSES.find(x => x.id === "fip");
+      if (t){
+        const td = el("td", {class:"cell", tabindex:"0", "data-id":t.id, role:"button", "aria-label":t.name},
+          el("span", {class:"nm"}, t.name), el("span", {class:"fm"}, t.formula), el("span", {class:"ex"}, exampleFor(t)));
+        td.onclick = () => { state.t = t.id; render(); document.getElementById("lab").scrollIntoView({behavior:"smooth", block:"start"}); };
+        td.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); td.onclick(); } };
+        tr.append(td);
+      } else {
+        const f = RARE[r + "|" + c];
+        tr.append(el("td", {class:"rare"}, f ? el("span", null, r + " " + c, el("br"), f) : "—"));
+      }
+    });
+    tbl.append(tr);
+  });
+  document.getElementById("ttab").append(tbl);
+}
+
+/* ---------- Kitten scene ---------- */
+function kitten(x, y, s, fur, line, closed){
+  const eyes = closed
+    ? `<path d="M-19 9 q4 4 8 0 M-5 9 q4 4 8 0" stroke="#3B2F2F" stroke-width="2.2" fill="none" stroke-linecap="round"/>`
+    : `<circle cx="-15" cy="8" r="3.6" fill="#2B2430"/><circle cx="-1" cy="8" r="3.6" fill="#2B2430"/><circle cx="-14" cy="7" r="1.1" fill="#fff"/><circle cx="0" cy="7" r="1.1" fill="#fff"/>`;
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <path d="M44 40 q34 -6 26 -42" stroke="${fur}" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path d="M44 40 q34 -6 26 -42" stroke="${line}" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".5"/>
+    <ellipse cx="20" cy="42" rx="32" ry="22" fill="${fur}" stroke="${line}" stroke-width="1.5"/>
+    <ellipse cx="4" cy="60" rx="8" ry="5" fill="${fur}" stroke="${line}" stroke-width="1.5"/>
+    <ellipse cx="30" cy="61" rx="8" ry="5" fill="${fur}" stroke="${line}" stroke-width="1.5"/>
+    <polygon points="-25,-2 -21,-24 -10,-7" fill="${fur}" stroke="${line}" stroke-width="1.5"/>
+    <polygon points="-6,-7 5,-24 9,-2" fill="${fur}" stroke="${line}" stroke-width="1.5"/>
+    <polygon points="-22,-5 -20,-17 -14,-8" fill="#F5B5C6"/><polygon points="-2,-8 4,-17 6,-5" fill="#F5B5C6"/>
+    <circle cx="-8" cy="10" r="21" fill="${fur}" stroke="${line}" stroke-width="1.5"/>
+    ${eyes}
+    <path d="M-10 15 l2 2.5 l2 -2.5 z" fill="#F07C9B"/>
+    <path d="M-8 17.5 q-3 4 -6 2 M-8 17.5 q3 4 6 2" stroke="#3B2F2F" stroke-width="1.3" fill="none"/>
+    <path d="M-27 13 h-12 M-27 17 h-11 M11 13 h12 M11 17 h11" stroke="${line}" stroke-width="1"/>
+    <path d="M-24 26 q16 9 32 0 l-2 7 q-14 7 -28 0 z" fill="#D7263D"/>
+    <rect x="2" y="28" width="7" height="14" rx="2" fill="#D7263D"/>
+  </g>`;
+}
+function tree(){
+  return `<g transform="translate(300 40)">
+    <rect x="-8" y="150" width="16" height="22" fill="#7A4E2D"/>
+    <polygon points="0,0 -40,60 40,60" fill="#1F7A4D"/><polygon points="0,35 -55,105 55,105" fill="#1B6B43"/><polygon points="0,75 -70,155 70,155" fill="#176038"/>
+    <polygon points="0,-14 4,-4 15,-4 6,3 9,14 0,7 -9,14 -6,3 -15,-4 -4,-4" fill="#F2C232"/>
+    <circle cx="-18" cy="55" r="5" fill="#E2457E"/><circle cx="20" cy="88" r="5" fill="#3A57E8"/><circle cx="-30" cy="120" r="5" fill="#F2C232"/><circle cx="34" cy="140" r="5" fill="#E2457E"/><circle cx="-6" cy="98" r="5" fill="#FF7A3D"/>
+  </g>`;
+}
+function sceneSVG(v, plural, result){
+  const W = "#F6F3EE", WL = "#BFB4A8", G = "#F2A65A", GL = "#C77B32";
+  let props = "", cats = "";
+  const floor = `<rect x="0" y="212" width="400" height="48" fill="#D9C7AE" opacity=".55"/>`;
+  if (v === "play"){
+    props = result ? `<g transform="translate(250 200)"><circle r="12" fill="#D7263D"/><rect x="-4" y="-16" width="8" height="5" fill="#C9A227"/></g>`
+                   : `<g transform="translate(140 200)"><circle r="13" fill="#D7263D"/><circle cx="-4" cy="-4" r="3" fill="#fff" opacity=".7"/><rect x="-4" y="-17" width="8" height="5" fill="#C9A227"/></g>`;
+    cats = kitten(80, 150, 1, W, WL, false) + (plural ? kitten(175, 158, .85, G, GL, false) : "");
+  } else if (v === "climb"){
+    const top = result ? 25 : 80;
+    cats = kitten(282, top, .6, W, WL, false) + (plural ? kitten(318, top + 60, .55, G, GL, false) : "");
+    props = "";
+  } else if (v === "eat"){
+    props = `<g transform="translate(150 205)"><ellipse rx="34" ry="10" fill="#3A57E8"/><ellipse cy="-4" rx="30" ry="6" fill="#8EA2FF"/>${result ? "" : `<path d="M-14 -8 q12 -10 24 0 q-12 8 -24 0 z M10 -8 l10 -6 v12 z" fill="#F2A65A"/>`}</g>`;
+    cats = kitten(70, 150, 1, W, WL, false) + (plural ? kitten(205, 152, .85, G, GL, false) : "");
+  } else {
+    const awake = !!result;
+    cats = kitten(205, 165, .75, W, WL, !awake) + (plural ? kitten(130, 165, .7, G, GL, !awake) : "");
+    props = awake ? "" : `<text x="250" y="140" font-family="Arial" font-weight="700" font-size="22" fill="#3A57E8">z</text><text x="264" y="122" font-family="Arial" font-weight="700" font-size="28" fill="#3A57E8">Z</text>`;
+  }
+  return `<svg viewBox="0 0 400 260" role="img" aria-label="Котёнок Снежок">${floor}${tree()}<g class="cat">${cats}</g>${props}</svg>`;
+}
+function timeline(kind){
+  const now = 200, y = 40;
+  let m = "";
+  const pt = (x, c) => `<circle cx="${x}" cy="${y}" r="9" fill="${c}"/>`;
+  const span = (a, b, c) => `<rect x="${a}" y="${y - 7}" width="${b - a}" height="14" rx="7" fill="${c}" opacity=".85"/>`;
+  if (kind === "repeat") m = [70, 130, 200, 270, 330].map(x => pt(x, "#E2457E")).join("");
+  if (kind === "spanNow") m = span(170, 230, "#E2457E");
+  if (kind === "toNow") m = pt(160, "#E2457E") + `<path d="M170 ${y} H188" stroke="#16936A" stroke-width="4"/><polygon points="188,${y - 7} 198,${y} 188,${y + 7}" fill="#16936A"/>`;
+  if (kind === "spanToNow") m = span(90, 206, "#E2457E");
+  if (kind === "pointPast") m = pt(100, "#E2457E");
+  if (kind === "spanPast") m = span(70, 140, "#E2457E") + `<path d="M110 ${y - 18} V${y + 18}" stroke="#3A57E8" stroke-width="3"/>`;
+  if (kind === "twoPast") m = pt(70, "#E2457E") + pt(130, "#3A57E8");
+  if (kind === "pointFuture") m = pt(300, "#E2457E");
+  if (kind === "fip") m = pt(90, "#3A57E8") + `<path d="M100 ${y - 14} Q 140 ${y - 34} 160 ${y - 12}" stroke="#E2457E" stroke-width="3" fill="none" stroke-dasharray="5 4"/>` + pt(165, "#E2457E");
+  return `<svg viewBox="0 0 400 80"><line x1="20" y1="${y}" x2="380" y2="${y}" stroke="currentColor" stroke-width="2" opacity=".35"/>
+    <polygon points="380,${y - 6} 392,${y} 380,${y + 6}" fill="currentColor" opacity=".35"/>
+    <line x1="${now}" y1="${y - 16}" x2="${now}" y2="${y + 16}" stroke="currentColor" stroke-width="2" opacity=".6"/>
+    ${m}
+    <text x="40" y="74" font-size="13" font-family="Nunito, Arial" font-weight="700" fill="currentColor" opacity=".7">PAST</text>
+    <text x="${now - 15}" y="74" font-size="13" font-family="Nunito, Arial" font-weight="700" fill="currentColor" opacity=".7">NOW</text>
+    <text x="320" y="74" font-size="13" font-family="Nunito, Arial" font-weight="700" fill="currentColor" opacity=".7">FUTURE</text></svg>`;
+}
+function chipRow(id, items, key, extraClass){
+  const box = document.getElementById(id); box.innerHTML = "";
+  items.forEach(([val, lab]) => {
+    const b = el("button", {type:"button", class:"chip " + (extraClass || ""), "aria-pressed":String(state[key] === val)}, lab);
+    b.onclick = () => { state[key] = val; render(); };
+    box.append(b);
+  });
+}
+function render(){
+  const t = TENSES.find(x => x.id === state.t), v = VERBS[state.v];
+  chipRow("tenseChips", TENSES.map(x => [x.id, x.name]), "t", "t");
+  chipRow("actChips", Object.entries(VERBS).map(([k, x]) => [k, x.label]), "v");
+  chipRow("numChips", [[false, "🐱 Snowball"], [true, "🐱🐱 The kittens"]], "plural");
+  const sc = document.getElementById("scene");
+  sc.className = "scene " + (t.time === "past" ? "past" : t.time === "future" ? "future" : "") + (t.move && state.v !== "sleep" ? " moving" : "");
+  sc.innerHTML = sceneSVG(state.v, state.plural, t.result) + `<span class="when">${t.label}</span>` + (t.result ? `<span class="res">✓ уже сделано</span>` : "");
+  const subj = state.plural ? "The kittens" : "Snowball";
+  document.getElementById("sent").innerHTML = t.make(subj, state.plural, v, v.obj);
+  document.getElementById("tl").innerHTML = timeline(t.tl);
+  document.getElementById("meta").innerHTML = "";
+  document.getElementById("meta").append(
+    el("div", null, el("small", null, t.name + " · формула"), t.formula),
+    el("div", null, el("small", null, "Когда"), t.when),
+    el("div", {style:"grid-column:1/-1"}, el("small", null, "Слова-маркеры"), t.signals));
+  document.querySelectorAll("#ttab td.cell").forEach(td => td.classList.toggle("sel", td.dataset.id === t.id));
+}
+
+/* ---------- Quiz ---------- */
+const QUIZ = [
+  {q:"Look! The kitten ____ with a Christmas ball.", o:["plays","is playing","played"], a:1, why:"Look! — действие прямо сейчас → Present Continuous."},
+  {q:"Snowball ____ fish every morning.", o:["eats","is eating","has eaten"], a:0, why:"every morning — регулярно → Present Simple (Snowball = he/she → -s)."},
+  {q:"The kittens ____ the Christmas tree yesterday.", o:["climb","have climbed","climbed"], a:2, why:"yesterday — точное время в прошлом → Past Simple."},
+  {q:"Oh no! Snowball ____ all the fish! The bowl is empty.", o:["has eaten","eats","will eat"], a:0, why:"Результат сейчас (миска пустая) → Present Perfect."},
+  {q:"The kitten ____ when the guests arrived.", o:["slept","was sleeping","sleeps"], a:1, why:"Процесс в момент в прошлом (when the guests arrived) → Past Continuous."},
+  {q:"I think Snowball ____ under the tree tomorrow.", o:["will sleep","sleeps","slept"], a:0, why:"tomorrow, I think → Future Simple."},
+  {q:"The kittens ____ for two hours, and they are still playing!", o:["are playing","have been playing","played"], a:1, why:"for two hours и до сих пор → Present Perfect Continuous."},
+  {q:"By the time Mum came home, the kitten ____ the tree.", o:["had climbed","has climbed","climbs"], a:0, why:"Раньше другого действия в прошлом (by the time Mum came) → Past Perfect."},
+  {q:"Mum said that the kittens ____ later.", o:["will eat","would eat","eat"], a:1, why:"said that… — будущее из прошлого → would + V."}
+];
+function renderQuiz(){
+  const box = document.getElementById("quiz"); box.innerHTML = "";
+  let done = 0, right = 0;
+  const score = document.getElementById("score");
+  const upd = () => { score.textContent = right + " из " + QUIZ.length + (done === QUIZ.length ? (right === QUIZ.length ? " · Идеально! 🎉" : " · Посмотри пояснения") : ""); };
+  QUIZ.forEach((it, i) => {
+    const why = el("p", {class:"why"});
+    const opts = el("div", {class:"opts"});
+    it.o.forEach((o, j) => {
+      const b = el("button", {type:"button"}, o);
+      b.onclick = () => {
+        if (opts.dataset.done) return; opts.dataset.done = "1"; done++;
+        if (j === it.a){ right++; b.classList.add("right"); why.textContent = "Верно! " + it.why; }
+        else { b.classList.add("wrong"); opts.children[it.a].classList.add("right"); why.textContent = it.why; }
+        upd();
+      };
+      opts.append(b);
+    });
+    box.append(el("div", {class:"q"}, el("p", {style:"font-weight:800"}, (i + 1) + ". " + it.q.replace("____", "_____")), opts, why));
+  });
+  upd();
+}
+document.getElementById("reset").onclick = renderQuiz;
+
+buildTable(); render(); renderQuiz();
+</script>
+<script src="newyear.js"></script>
+</body>
+</html>
